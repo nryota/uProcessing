@@ -79,6 +79,9 @@ box()やrect()などもすべて個別のGameObjectとなっています。毎�
 #### GameObjectのキープ
 recycle()の場合、GameObjectは消さずに使いまわすとはいえ、毎回draw()内で描画指示する必要があります。もっとUnity的に一度生成したら放っておいてもオブジェクトが描画されるような形で使いたい場合、keep()、noKeep()またはbeginKeep()〜endKeep()を使うと実現できます。
 
+#### 拡張
+その他、prefab()でPrefabから生成できたり、loadScene()でシーンをロードできたりといったUnity的な便利関数も一部追加しています。
+
 
 Attention
 -----------
