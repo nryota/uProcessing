@@ -13,7 +13,8 @@ Unity 4を対象としています。
 
 使い方は簡単、PGraphics（MonoBehaviour）を継承したスクリプトをオブジェクトに貼り付け、setup()とdraw()関数をオーバーライドし、Processingに似た形で定義してある関数でコードを書くだけです。Unityのコードもそのまま共存して使えます。言語はC#です。
 
-![画面例](http://cafe.eyln.com/GitHub/uProcessing/screenshot.jpg "ScreenShot")
+![基本画面](http://cafe.eyln.com/GitHub/uProcessing/screenshot.png "ScreenShot")
+
 
 #### Primitives.cs
     
@@ -49,6 +50,14 @@ Samples
 -------
 Assets/uProcessing/Scenesに各種サンプルシーンが入っています。
 Menuのシーンから各シーンを呼び出せて、各シーンでESCキーを押すとMenuのシーンに戻れます。
+
+![サンプル画面1](http://cafe.eyln.com/GitHub/uProcessing/hello.png "hello")
+![サンプル画面2](http://cafe.eyln.com/GitHub/uProcessing/menu.png "menu")
+![サンプル画面3](http://cafe.eyln.com/GitHub/uProcessing/primitives.png "primitives")
+![サンプル画面4](http://cafe.eyln.com/GitHub/uProcessing/pteridophyte.png "pteridophyte")
+![サンプル画面5](http://cafe.eyln.com/GitHub/uProcessing/earth.png "earth")
+![サンプル画面6](http://cafe.eyln.com/GitHub/uProcessing/action.png "action")
+
 
 Extra
 -------
