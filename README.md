@@ -94,7 +94,7 @@ License
 ----------
 #### uProcessing
 
-Copyright &copy; 2014 [NISHIDA Ryota][EYLN]
+Copyright &copy; 2014 NISHIDA Ryota [http://dev.eyln.com][EYLN]
 Distributed under the [ZLIB License][ZLIB].
  
 [EYLN]: http://dev.eyln.com/
