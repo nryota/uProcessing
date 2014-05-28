@@ -59,7 +59,7 @@ Menuのシーンから各シーンを呼び出せて、各シーンでESCキー�
 ![サンプル画面6](http://cafe.eyln.com/GitHub/uProcessing/action.png "action")
 
 
-Extra
+Extras
 -------
 #### 画面モード
 size()で指定する画面モードはProcessing用の座標系であるP2D、P3Dの他、Unity用のU2D、U3Dを用意しています。P系はY軸とZ軸の向きがUnityと逆方向で、オブジェクトを内部的に縮小スケールしてシーンに配置しています（座標指定時の座標がピクセル単位なのでそのまま配置すると大きすぎるので）。
@@ -81,6 +81,7 @@ recycle()の場合、GameObjectは消さずに使いまわすとはいえ、毎�
 
 #### 拡張
 その他、prefab()でPrefabから生成できたり、loadScene()でシーンをロードできたりといったUnity的な便利関数も一部追加しています。
+PGraphicsのIsEnableMaterialPBをtrueにしておく（デフォルトでtrue）とマテリアルをインスタンスごとに複製せずに色を指定するようになります。
 
 
 Attention
