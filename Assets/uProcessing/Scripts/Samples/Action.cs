@@ -52,7 +52,7 @@ public class Action : PGraphics {
 			if(random(100) < 50 - level * 40) { y -= 10.0f; }
 			translate(bx * 3, y, 0); 
 			fill((int)(level * 255), 0, 0);
-			var obj = box(random(0.2f, 2.5f), 0.2f, 2.0f);
+			/*var obj = */box(random(0.2f, 2.5f), 0.2f, 2.0f);
 			/*if(!obj.rigidbody) {
 				obj.addRigid();
 				obj.rigidbody.isKinematic = true;

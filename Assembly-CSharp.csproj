@@ -61,6 +61,7 @@
      <Compile Include="Assets\uProcessing\Scripts\Samples\HelloWorld.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Images.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Menu.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Samples\Performance.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Primitives.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Pteridophyte.cs" />
      <None Include="Assets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eye.shader" />

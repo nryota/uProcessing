@@ -12,6 +12,7 @@ public class PGraphics : MonoBehaviour {
 	#region Settings
 	[SerializeField] private bool isAutoFit = true;
 	[SerializeField] private bool isSetDefaultLight = true;
+	[SerializeField] private bool isEnableMaterialPB = true;
 	[SerializeField] private float sceneScale = 0.01f;
 	[SerializeField] private float depthStep = 0.05f;
 	#endregion
@@ -83,6 +84,7 @@ public class PGraphics : MonoBehaviour {
 		}
 	}
 	private PStyle style;
+	private MaterialPropertyBlock materialPB;
 
 	private struct SystemObject {
 		public GameObject gameObject;
@@ -139,6 +141,7 @@ public class PGraphics : MonoBehaviour {
 		screenMode = P3D;
 		workPrimitiveKey = 1;
 		workPrimitiveGroupIndex = 0;
+		materialPB = new MaterialPropertyBlock ();
 		system.init(this);
 		axis = new Vector3(1, -1, -1);
 		sceneScaleAxis = new Vector3(sceneScale * axis.x, sceneScale * axis.y, sceneScale * axis.z);
@@ -288,6 +291,7 @@ public class PGraphics : MonoBehaviour {
 			tempPrimitives.Add(obj);
 			obj.name = obj.name + "/(Temp)";
 		}
+
 		return pg;
 	}
 
@@ -338,14 +342,22 @@ public class PGraphics : MonoBehaviour {
 
 			trans.localRotation = system.work.localRotation;
 			trans.localScale = Vector3.Scale(system.work.localScale, toScene(scale));
-
-			if(obj.renderer && obj.renderer.material) {
+			if(obj.renderer) {
 				Color col;
 				if(obj.isImage) col = style.tintColor;
 				else if(obj.isLine) col = style.strokeColor;
 				else col = style.fillColor;
-				obj.renderer.material.color = col;
+
+				if(isEnableMaterialPB) {
+					materialPB.Clear();
+					materialPB.AddColor("_Color", col);
+					obj.renderer.SetPropertyBlock(materialPB);
+				} else if(obj.renderer.material) {
+					obj.renderer.material.color = col;
+				}
+
 				if(obj.renderer) { obj.renderer.enabled = style.isFill; }
+
 				PWireframe pw = obj.wireframe;
 				if(pw) {
 					pw.isStroke = style.isStroke;

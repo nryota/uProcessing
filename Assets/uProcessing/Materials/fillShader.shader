@@ -7,10 +7,8 @@
 		Tags {"Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent"}
 		LOD 200
 
-        Pass {
-            ZWrite On
-            ColorMask 0
-        }
+		ZWrite On
+		ColorMask 0
 
 		CGPROGRAM
 		#pragma surface surf Lambert alpha
