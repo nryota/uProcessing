@@ -12,6 +12,7 @@ GameObject:
   - 135: {fileID: 13500000}
   - 23: {fileID: 2300000}
   - 114: {fileID: 11400000}
+  - 114: {fileID: 11400002}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -30,6 +31,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!23 &2300000
 Renderer:
   m_ObjectHideFlags: 1
@@ -48,9 +50,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!33 &3300000
 MeshFilter:
   m_ObjectHideFlags: 1
@@ -70,6 +71,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   primitiveType: 5
+--- !u!114 &11400002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51ddf2b278498441f877f33f12a35587, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isStroke: 1
+  isDraw1st: 0
+  isDraw2nd: 1
+  isDraw3rd: 0
+  isFlat: 0
+  strokeColor: {r: 0, g: 1, b: 1, a: 1}
+  strokeWeight: 2
+  capLevel: 1
+  depth: -9.99999975e-05
+  strokeMaterial: {fileID: 2100000, guid: 01a97b942550b447291b8ac5cd8dc08b, type: 2}
 --- !u!135 &13500000
 SphereCollider:
   m_ObjectHideFlags: 1

@@ -34,8 +34,13 @@ public class Menu : PGraphics {
 			loadScene("Images");
 		}
 
+		/*
 		if(button("Pteridophyte", color(255, 128, 0), ts, x + s + w, y, w, h)) {
 			loadScene("Pteridophyte");
+		}
+		*/
+		if(button("Performance", color(255, 128, 0), ts, x + s + w, y, w, h)) {
+			loadScene("Performance");
 		}
 
 		y += s + h;

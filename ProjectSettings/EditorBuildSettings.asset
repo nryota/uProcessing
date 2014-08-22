@@ -19,3 +19,5 @@ EditorBuildSettings:
     path: Assets/uProcessing/Scenes/Pteridophyte.unity
   - enabled: 1
     path: Assets/uProcessing/Scenes/Action.unity
+  - enabled: 1
+    path: Assets/uProcessing/Scenes/Performance.unity

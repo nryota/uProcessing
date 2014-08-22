@@ -99,5 +99,9 @@ public class PGameObject : MonoBehaviour {
 			return (hit.collider!=null && hit.collider.gameObject==this.gameObject);
 		}
 	}
+
+	public bool is2D { get { return primitiveType==PrimitiveType.Rect || primitiveType==PrimitiveType.Ellipse || primitiveType==PrimitiveType.Line || primitiveType==PrimitiveType.Text; } } 
+
+	public void destroy() { Destroy(gameObject); }
 	#endregion
 }

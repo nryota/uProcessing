@@ -4,7 +4,7 @@ using System.Collections;
 public class Primitives : PGraphics {
 
 	protected override void setup() {
-		size(512, 512, P3D);
+		size(512, 512, P2D);
 		
 		stroke(0, 128, 64);
 		strokeWeight(20);

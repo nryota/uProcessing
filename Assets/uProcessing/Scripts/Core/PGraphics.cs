@@ -15,6 +15,7 @@ public class PGraphics : MonoBehaviour {
 	[SerializeField] private bool isEnableMaterialPB = true;
 	[SerializeField] private float sceneScale = 0.01f;
 	[SerializeField] private float depthStep = 0.05f;
+	[SerializeField] private bool useDepthStep = true;
 	#endregion
 
 	#region Primitives
@@ -335,9 +336,11 @@ public class PGraphics : MonoBehaviour {
 			if(parent && (trans.parent==null || !trans.parent.Equals(parent.transform))) trans.parent = parent.transform;
 
 			Vector3 newPos = system.work.localPosition + toScene(pos);
-			workDepth -= sceneScale * depthStep;
-			Vector3 depth = Vector3.Scale(system.camera.transform.forward, new Vector3(workDepth, workDepth, workDepth));
-			newPos += depth;
+			if(obj.is2D && useDepthStep) {
+				workDepth -= sceneScale * depthStep;
+				Vector3 depth = Vector3.Scale(system.camera.transform.forward, new Vector3(workDepth, workDepth, workDepth));
+				newPos += depth;
+			}
 			obj.transform.localPosition = newPos;
 
 			trans.localRotation = system.work.localRotation;
@@ -363,6 +366,7 @@ public class PGraphics : MonoBehaviour {
 					pw.isStroke = style.isStroke;
 					pw.strokeColor = style.strokeColor;
 					pw.strokeWeight = style.strokeWeight * sceneScale;
+					//pw.strokeMaterial.color = style.strokeColor;
 				}
 			}
 
@@ -385,6 +389,10 @@ public class PGraphics : MonoBehaviour {
 	public Vector3 toScene(float x, float y, float z) {
 		return new Vector3(x * sceneScaleAxis.x, y * sceneScaleAxis.y, z * sceneScaleAxis.z);
 	}
+
+	public float toSceneX(float x) { return x * sceneScaleAxis.x; }
+	public float toSceneY(float y) { return y * sceneScaleAxis.y; }
+	public float toSceneZ(float z) { return z * sceneScaleAxis.z; }
 
 	private Rect GetAspectRect(float x, float y, float w, float h) {
 		float aspect = w / h;
@@ -530,11 +538,11 @@ public class PGraphics : MonoBehaviour {
 	public int key { get { return oneKey; } }
 	public int keyCode { get { return oneKeyCode; } }
 
-	public Color color(int gray) {
+	public static Color color(int gray) {
 		return new Color(gray * inv255, gray * inv255, gray * inv255);
 	}
 	
-	public Color color(int r, int g, int b, int a = 255) {
+	public static Color color(int r, int g, int b, int a = 255) {
 		return new Color(r * inv255, g * inv255, b * inv255, a * inv255);
 	}
 	
@@ -723,6 +731,7 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	public PGameObject pushMatrix(string name) {
+		pushMatrix();
 		PGameObject child = GetPrimitive();
 		if(!child) {
 			child = AddPrimitive(new GameObject(name));
@@ -743,6 +752,7 @@ public class PGraphics : MonoBehaviour {
 			system.work.localRotation = Quaternion.identity;
 			system.work.localScale = Vector3.one;
 		}
+		popMatrix();
 		return system.parent.gameObject;
 	}
 
@@ -1056,6 +1066,16 @@ public class PGraphics : MonoBehaviour {
 	public Vector3 pixelToWorld(float x, float y) {
 		return system.camera.ScreenToWorldPoint(new Vector3(x, displayHeight - y, system.camera.nearClipPlane));
 	}
+	public Vector3 worldToPixel(float x, float y, float z=0.0f) {
+		return system.camera.WorldToScreenPoint(new Vector3(x, y, z));
+	}
+	public Vector3 worldToScreen(float x, float y, float z=0.0f) {
+		Vector3 v = system.camera.WorldToScreenPoint(new Vector3(x, y, z));
+		v.x = pixelToSceneX(v.x);
+		v.y = pixelToSceneY(v.y);
+		//v.z = 0.0f;
+		return v;
+	}
 
 	public float pixelN(float n) { return n * invFitScale; }
 	public float pixelX(float x) { return pixelToSceneX(x); }
@@ -1089,6 +1109,9 @@ public class PGraphics : MonoBehaviour {
 		return y;
 	}
 
+	public void layout2D() { useDepthStep = true; }
+	public void layout3D() { useDepthStep = false; }
+
 	public bool mouseReleased { get { return mouseButtonUp != NONE; } }
 	public int mouseButtonUp {
 		get { 
@@ -1110,6 +1133,9 @@ public class PGraphics : MonoBehaviour {
 	public bool isKey(KeyCode keyCode) { return Input.GetKey(keyCode); }
 	public bool isKeyDown(KeyCode keyCode) { return Input.GetKeyDown(keyCode); }
 	public bool isKeyUp(KeyCode keyCode) { return Input.GetKeyUp(keyCode); }
+	public bool isKey(string keyName) { return Input.GetKey(keyName); }
+	public bool isKeyDown(string keyName) { return Input.GetKeyDown(keyName); }
+	public bool isKeyUp(string keyName) { return Input.GetKeyUp(keyName); }
 
 	public float inputAxis(string name) { return Input.GetAxis(name); }
 	public float inputX { get { return Input.GetAxis("Horizontal"); } }
