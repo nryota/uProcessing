@@ -59,7 +59,6 @@
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eyelash_blend.shader" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada.shader" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada_blend.shader" />
-     <None Include="Assets\uProcessing\Materials\strokeShader 1.shader" />
  <Reference Include="AssetStoreTools">
  <HintPath>/Users/ryota/Documents/Dev/GitHub/uProcessing/Assets/AssetStoreTools/Editor/AssetStoreTools.dll</HintPath>
  </Reference>

@@ -76,7 +76,6 @@
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eyelash_blend.shader" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada.shader" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada_blend.shader" />
-     <None Include="Assets\uProcessing\Materials\strokeShader 1.shader" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
