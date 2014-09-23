@@ -13,7 +13,7 @@ public class Action : PGraphics {
 		layerMaskEverything();
 		removeLayerMask(LAYER_2D);
 
-		size(10 * displayAspectW, 10, U3D, 1.0f);
+		size(500 * displayAspectW, 500, U3D, 1.0f);
 
 		unityChanLogo = loadImage("unitychanLogo");
 		unityChan.init(this);
@@ -23,6 +23,7 @@ public class Action : PGraphics {
 	protected override void draw() {
 		layerMaskEverything();
 		removeLayerMask(LAYER_2D);
+		layout3D();
 
 		backgroundSkybox();
 		lights();
@@ -63,13 +64,16 @@ public class Action : PGraphics {
 
 	void draw2D() {
 		layerAndMask(LAYER_2D);
+		layout2D();
 		ortho();
 		noLights();
+
 		fill(255);
-		textSize(pixelN(14)); textAlign(LEFT, BOTTOM);
-		text("[LEFT]:Back  [RIGHT]:Run  [UP or SPACE]:Jump  [DOWN or R-CTRL]:Slide", pixelX(10), pixelY(displayHeight - 10));
-		image(unityChanLogo, pixelX(displayWidth - unityChanLogo.width - 10),
-		      pixelY(displayHeight - unityChanLogo.height - 10), pixelN(unityChanLogo.width), pixelN(unityChanLogo.height));
+		textSize(14); textAlign(LEFT, BOTTOM);
+		text("[LEFT]:Back  [RIGHT]:Run  [UP or SPACE]:Jump  [DOWN or R-CTRL]:Slide", 10, height - 10);
+		image(unityChanLogo,
+		      width - unityChanLogo.width - 10, height - unityChanLogo.height - 10,
+		      unityChanLogo.width, unityChanLogo.height);
 	}
 	
 	protected override void onKeyTyped() {

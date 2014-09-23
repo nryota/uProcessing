@@ -11,6 +11,7 @@ public class PGraphics : MonoBehaviour {
 
 	#region Settings
 	[SerializeField] private bool isAutoFit = true;
+	[SerializeField] private bool isCenter = true;
 	[SerializeField] private bool isSetDefaultLight = true;
 	[SerializeField] private bool isEnableMaterialPB = true;
 	[SerializeField] private float sceneScale = 0.01f;
@@ -125,6 +126,7 @@ public class PGraphics : MonoBehaviour {
 	private bool isRecycle = false;
 	private bool isKeep = false;
 	private bool isClearBG = false;
+	private bool isUseBaseCoordinate = false;
 	private bool isSetup = false;
 	private float fitScale = 1.0f;
 	private float invFitScale = 1.0f;
@@ -335,7 +337,8 @@ public class PGraphics : MonoBehaviour {
 			if(system.drawParentObj) { parent = system.drawParentObj.transform; }
 			if(parent && (trans.parent==null || !trans.parent.Equals(parent.transform))) trans.parent = parent.transform;
 
-			Vector3 newPos = system.work.localPosition + toScene(pos);
+			Vector3 newPos = system.work.localPosition + toSceneCoordinate(pos);
+
 			if(obj.is2D && useDepthStep) {
 				workDepth -= sceneScale * depthStep;
 				Vector3 depth = Vector3.Scale(system.camera.transform.forward, new Vector3(workDepth, workDepth, workDepth));
@@ -351,29 +354,74 @@ public class PGraphics : MonoBehaviour {
 				else if(obj.isLine) col = style.strokeColor;
 				else col = style.fillColor;
 
-				if(isEnableMaterialPB) {
-					materialPB.Clear();
-					materialPB.AddColor("_Color", col);
-					obj.renderer.SetPropertyBlock(materialPB);
-				} else if(obj.renderer.material) {
-					obj.renderer.material.color = col;
-				}
+				if(style.isFill) fill(obj, col);
+				else noFill(obj);
 
-				if(obj.renderer) { obj.renderer.enabled = style.isFill; }
-
-				PWireframe pw = obj.wireframe;
-				if(pw) {
-					pw.isStroke = style.isStroke;
-					pw.strokeColor = style.strokeColor;
-					pw.strokeWeight = style.strokeWeight * sceneScale;
-					//pw.strokeMaterial.color = style.strokeColor;
-				}
+				if(style.isStroke) {
+					stroke(obj, style.strokeColor);
+					strokeWeight(obj, style.strokeWeight);
+				} else noStroke(obj);
 			}
 
 			obj.gameObject.layer = style.layer;
 		}
 	}
-	
+
+	#region PGameObject Utility
+	public void tint(PGameObject obj, Color col) {
+		if(obj.isImage) {
+			fill(obj, col);
+		}
+	}
+
+	public void noTint(PGameObject obj) {
+		if(obj.isImage) {
+			fill(obj, Color.white);
+		}
+	}
+
+	public void fill(PGameObject obj, Color col) {
+		if(obj.renderer) {
+			if(isEnableMaterialPB) {
+				materialPB.Clear();
+				materialPB.AddColor("_Color", col);
+				obj.renderer.SetPropertyBlock(materialPB);
+			} else if(obj.renderer.material) {
+				obj.renderer.material.color = col;
+			}
+			obj.renderer.enabled = true;
+		}
+	}
+
+	public void noFill(PGameObject obj) {
+		if(obj.renderer) {
+			obj.renderer.enabled = false;
+		}
+	}
+
+	public void stroke(PGameObject obj, Color col) {
+		PWireframe pw = obj.wireframe;
+		if(pw) {
+			pw.isStroke = true;
+			pw.strokeColor = col;
+		}
+	}
+
+	public void strokeWeight(PGameObject obj, float weight) {
+		PWireframe pw = obj.wireframe;
+		if(pw) {
+			pw.strokeWeight = weight * sceneScale;
+		}
+	}
+
+	public void noStroke(PGameObject obj) {
+		PWireframe pw = obj.wireframe;
+		if(pw) {
+			pw.isStroke = false;
+		}
+	}
+	#endregion
+
 	public Vector3 toAxis(Vector3 v) {
 		return Vector3.Scale(v, axis);
 	}
@@ -394,21 +442,37 @@ public class PGraphics : MonoBehaviour {
 	public float toSceneY(float y) { return y * sceneScaleAxis.y; }
 	public float toSceneZ(float z) { return z * sceneScaleAxis.z; }
 
+	public Vector3 toSceneCoordinate(Vector3 v) {
+		return toSceneCoordinate(v.x, v.y, v.z);
+	}
+
+	public Vector3 toSceneCoordinate(float x, float y, float z) {
+		if(isUseBaseCoordinate) {
+			return new Vector3(baseX(x) * sceneScaleAxis.x, baseY(y) * sceneScaleAxis.y, z * sceneScaleAxis.z);
+		} else {
+			return toScene(x, y, z);
+		}
+	}
+
 	private Rect GetAspectRect(float x, float y, float w, float h) {
 		float aspect = w / h;
 		x /= w;
 		y /= h;
-		if(screenMode==U2D || screenMode==U3D) {
-			w = 1.0f;
-			h = 1.0f;
-		} else if(w >= h) {
+		if(w >= h) {
 			w = 1.0f;
 			h = 1.0f / aspect;
-			y += 1.0f - h;
 		} else {
 			w = aspect;
 			h = 1.0f;
 		}
+		if(!isAutoFit) {
+			w /= displayScale;
+			h /= displayScale;
+			y = 1 - invFitScale;
+		}
+		y += 1.0f - h;
+		x += displayOffsetX / displayWidth;
+		y -= displayOffsetY / displayHeight;
 		return new Rect(x, y, w, h);
 	}
 	#endregion
@@ -455,7 +519,6 @@ public class PGraphics : MonoBehaviour {
 
 	public int displayWidth { get { return Screen.width; } }
 	public int displayHeight { get { return Screen.height; } }
-	public float displayAspectW { get { return (float)Screen.width / Screen.height; } }
 	public int frameCount { get { return Time.frameCount; } }
 	public int day() { return DateTime.Now.Day; }
 	public int hour() { return DateTime.Now.Hour; }
@@ -514,6 +577,8 @@ public class PGraphics : MonoBehaviour {
 
 	private float _width;
 	private float _height;
+	private float _screenWidth;
+	private float _screenHeight;
 	public float width { get { return _width * fitScale; } }
 	public float height { get { return _height * fitScale; } }
 	public float baseWidth { get { return _width; } }
@@ -529,8 +594,8 @@ public class PGraphics : MonoBehaviour {
 		}
 	}
 
-	public int mouseX { get { return (int)pixelToSceneX(Input.mousePosition.x); } }
-	public int mouseY { get { return (int)pixelToSceneY(Input.mousePosition.y); } }
+	public int mouseX { get { return (int)pixelToScreenX(Input.mousePosition.x); } }
+	public int mouseY { get { return (int)pixelToScreenY(Input.mousePosition.y); } }
 	public int pmouseX { get; private set; } 
 	public int pmouseY { get; private set; } 
 
@@ -538,10 +603,10 @@ public class PGraphics : MonoBehaviour {
 	public int key { get { return oneKey; } }
 	public int keyCode { get { return oneKeyCode; } }
 
-	public static Color color(int gray) {
-		return new Color(gray * inv255, gray * inv255, gray * inv255);
+	public static Color color(int gray, int alpha = 255) {
+		return new Color(gray * inv255, gray * inv255, gray * inv255, alpha * 255);
 	}
-	
+
 	public static Color color(int r, int g, int b, int a = 255) {
 		return new Color(r * inv255, g * inv255, b * inv255, a * inv255);
 	}
@@ -550,22 +615,47 @@ public class PGraphics : MonoBehaviour {
 		screenMode = mode;
 		if(scale > 0.0f) { sceneScale = scale; }
 
-		if(isAutoFit) { fitScale = (w >= h) ? (float)displayHeight / h : (float)displayWidth / w; }
+		float dh = (float)displayHeight / h;
+		float dw = (float)displayWidth / w;
+
+		//bool isScaling = isP5;
+		bool isScaling = true; 
+
+		if(isScaling) { _displayScale = min(dh, dw); }
+		else { _displayScale = 1.0f; }
+
+		if(_displayScale < 1.0f) isAutoFit = true;
+
+		if(isAutoFit) { fitScale = max(dh, dw); }
 		else { fitScale = 1.0f; }
 		invFitScale = 1.0f / fitScale;
 
 		_width = w * invFitScale;
 		_height = h * invFitScale;
+		_screenWidth = displayWidth / displayScale;
+		_screenHeight = displayHeight / displayScale;
 
-		if(mode==P2D || mode==P3D) {
-			axis.Set(1, -1, -1);
-		} else {
-			axis.Set(1, 1, 1);
+		_displayOffsetX = 0;
+		_displayOffsetY = 0;
+		if(isCenter && isScaling) {
+			if(isAutoFit) {
+				_displayOffsetX = (displayWidth - width * displayScale) * 0.5f;
+			} else {
+				_displayOffsetX = (displayWidth - width) * 0.5f;
+				_displayOffsetY = (displayHeight - height) * 0.5f;
+			}
 		}
+
+		if(isP5) { axis.Set(1, -1, -1); }
+		else { axis.Set(1, 1, 1); }
+
 		sceneScaleAxis.Set(sceneScale * axis.x, sceneScale * axis.y, sceneScale * axis.z);
 
+		//println("size: " + 0 + ", " + 0 + ", " + width + ", " + height + " (x " + fitScale + ")");
+		//println("screen: " + screenOffsetX + ", " + screenOffsetY + ", " + screenWidth + ", " + screenHeight);
+		//println("display: " + displayOffsetX + ", " + displayOffsetY + ", " + displayWidth + ", " + displayHeight + " (x " + displayScale + ")");
+
 		system.cameraNum = 0;
-		bool is2D = (mode==P2D || mode==U2D);
 		if(is2D) { ortho(); }
 		else { perspective(); }
 
@@ -573,10 +663,11 @@ public class PGraphics : MonoBehaviour {
 			beginKeep();
 			lights();
 			endKeep();
-		} else noLights();
+		} else {
+			noLights();
+		}
 
 		system.camera.cullingMask = style.layerMask;
-
 		return system.camera;
 	}
 
@@ -602,9 +693,8 @@ public class PGraphics : MonoBehaviour {
 			pushStyle();
 				noStroke();
 				tint(255);
-				float offsetX = (displayWidth - width * displayScale) * 0.5f * invFitScale;
 				imageMode(CORNER);
-				image(img, -offsetX, 0, width + offsetX * 2.0f, displayHeight * invFitScale);
+				image(img, 0, 0, width, height);
 			popStyle();
 			endRecycle();
 		}
@@ -626,7 +716,7 @@ public class PGraphics : MonoBehaviour {
 						noStroke();
 						fill(style.backgroundColor);
 						rectMode(CORNER);
-						rect(screenOffsetX, screenOffsetY, screenWidth, screenHeight);
+						rect(0, 0, width, height);
 					popStyle();
 					endRecycle();
 				}
@@ -666,7 +756,7 @@ public class PGraphics : MonoBehaviour {
 		if(system.camera) {
 			float x = (sceneScaleAxis.x * left) < (sceneScaleAxis.x * right) ? sceneScaleAxis.x * left : sceneScaleAxis.x * right;
 			float y = 0;//(sceneScaleAxis.y * bottom) < (sceneScaleAxis.y * top) ? sceneScaleAxis.y * bottom : sceneScaleAxis.y * top;
-			system.camera.rect = GetAspectRect(x, y, abs(right-left), abs(bottom-top));
+			system.camera.rect = GetAspectRect(x, y, abs(right-left), abs(bottom-top) * displayAspectW);
 			system.camera.nearClipPlane = near * sceneScale;
 			system.camera.farClipPlane = far * sceneScale;
 			system.camera.orthographic = true;
@@ -698,7 +788,7 @@ public class PGraphics : MonoBehaviour {
 			system.camera.nearClipPlane = near * sceneScale;
 			system.camera.farClipPlane = far * sceneScale;
 			float w = height * aspect;
-			float h = height;
+			float h = height * displayAspectW;
 			system.camera.rect = GetAspectRect(0, 0, w, h);
 			if(screenMode==P2D || screenMode==P3D) {
 				system.camera.transform.localPosition = toScene(width * 0.5f, height * 0.5f, -height * 0.8660254f * axis.z);
@@ -767,7 +857,7 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	public void translate(float x, float y, float z=0.0f) {
-		system.work.Translate(toScene(x, y, z));
+		system.work.Translate(toSceneCoordinate(x, y, z));
 	}
 	
 	public void rotate(float angle) {
@@ -862,8 +952,8 @@ public class PGraphics : MonoBehaviour {
 		var l = obj.gameObject.GetComponent<LineRenderer>();
 		l.SetWidth(style.strokeWeight * sceneScale, style.strokeWeight * sceneScale);
 		l.SetVertexCount(2);
-		l.SetPosition(0, toScene(x1, y1, z1));
-		l.SetPosition(1, toScene(x2, y2, z2));
+		l.SetPosition(0, toSceneCoordinate(x1, y1, z1));
+		l.SetPosition(1, toSceneCoordinate(x2, y2, z2));
 		float invScene = 1.0f / sceneScale;
 		SetProperty(obj, Vector3.zero, new Vector3(axis.x * invScene, axis.y * invScene, axis.z * invScene));
 		return obj;
@@ -878,7 +968,13 @@ public class PGraphics : MonoBehaviour {
 		PGameObject obj = GetPrimitive();
 		if(!obj) { obj = AddPrimitive(Instantiate(basicPrefabs.rect) as GameObject); }
 		Vector3 p;
-		if(style.rectMode==CORNER) p = new Vector3(x + (w * 0.5f) * axis.x, y + (h * 0.5f) * -axis.y, 0.0f);
+		if(style.rectMode==CORNER) {
+			if(isUseBaseCoordinate) {
+				p = new Vector3(x + (w * 0.5f) * axis.x, y + (h * 0.5f) * axis.y, 0.0f);
+			} else {
+				p = new Vector3(x + (w * 0.5f) * axis.x, y + (h * 0.5f) * -axis.y, 0.0f);
+			}
+		}
 		else p = new Vector3(x, y, 0.0f);
 		SetProperty(obj, p, new Vector3(w, h, sceneScaleAxis.z)); // rect prefab side
 		return obj;
@@ -1051,17 +1147,30 @@ public class PGraphics : MonoBehaviour {
 	#endregion
 
 	#region Processing Extra Members
+	public bool is2D { get { return (screenMode==P2D || screenMode==U2D); } }
+	public bool is3D { get { return !is2D; } }
+	public bool isP5 { get { return (screenMode==P2D || screenMode==P3D); } }
+	public bool isProcessing { get { return isP5; } }
+	public bool isUnity { get { return !isP5; } }
+
 	public float INFINITY { get { return Mathf.Infinity; } }
 	public float deltaTime { get { return Time.deltaTime; } }
 	public Vector2 axis2D { get { return new Vector2(axis.x, axis.y); } }
 	public Vector3 axis3D { get { return axis; } }
 	public float sceneDepthStep { get { return depthStep * sceneScaleAxis.z; } }
 
-	public float screenOffsetX { get { return pixelToSceneX(0); } }
-	public float screenOffsetY { get { return 0.0f; } }
-	public float screenWidth { get { return displayWidth * invFitScale; } }
-	public float screenHeight { get { return displayHeight * invFitScale; } }
-	public float displayScale { get { return displayHeight / height; } }
+	private float _displayOffsetX;
+	private float _displayOffsetY;
+	private float _displayScale;
+	public float displayAspectW { get { return (float)Screen.width / Screen.height; } }
+	public float displayOffsetX { get { return _displayOffsetX; } }
+	public float displayOffsetY { get { return _displayOffsetY; } }
+	public float displayScale { get { return _displayScale; } }
+
+	public float screenOffsetX { get { return 0; } }
+	public float screenOffsetY { get { return 0; } }
+	public float screenWidth { get { return _screenWidth; } }
+	public float screenHeight { get { return _screenHeight; } }
 
 	public Vector3 pixelToWorld(float x, float y) {
 		return system.camera.ScreenToWorldPoint(new Vector3(x, displayHeight - y, system.camera.nearClipPlane));
@@ -1071,46 +1180,72 @@ public class PGraphics : MonoBehaviour {
 	}
 	public Vector3 worldToScreen(float x, float y, float z=0.0f) {
 		Vector3 v = system.camera.WorldToScreenPoint(new Vector3(x, y, z));
-		v.x = pixelToSceneX(v.x);
-		v.y = pixelToSceneY(v.y);
+		v.x = pixelToScreenX(v.x);
+		v.y = pixelToScreenY(v.y);
 		//v.z = 0.0f;
 		return v;
 	}
 
-	public float pixelN(float n) { return n * invFitScale; }
-	public float pixelX(float x) { return pixelToSceneX(x); }
-	public float pixelY(float y) { return pixelToSceneY(y); }
+	//public float baseN(float n) { return n; }
+	public float baseX(float x) { return (isUnity) ? x - width * 0.5f : x; }
+	public float baseY(float y) { return (isUnity) ? height * 0.5f - y: y; }
 
-	public float pixelToSceneX(float x) {
+	public float pixelN(float n) { return (isAutoFit || isUnity) ? n / _displayScale : n; }
+	public float pixelX(float x) { return pixelToScreenX(x); }
+	public float pixelY(float y) { return pixelToScreenY(y); }
+
+	public float pixelToScreenX(float x) {
 		if(axis.x <= 0.0f) { x = displayWidth - x; }
-		x -= (displayWidth - width * displayScale) * 0.5f;
-		if(screenMode==U2D || screenMode==U3D) { x -= displayWidth * 0.5f; }
-		return x * invFitScale;
+		if(isUnity) {
+			x -= displayWidth * 0.5f;
+		} else {
+			x -= displayOffsetX;
+		}
+		if(isAutoFit || isUnity) { x /= _displayScale; }
+		return x;
 	}
 	
-	public float pixelToSceneY(float y) {
+	public float pixelToScreenY(float y) {
 		if(axis.y <= 0.0f) { y = displayHeight - y; }
-		if(screenMode==U2D || screenMode==U3D) { y = displayHeight * 0.5f - y; }
-		return y * invFitScale;
+		if(isUnity) {
+			y = displayHeight * 0.5f - y; 
+		} else {
+			y -= displayOffsetY;
+		}
+		if(isAutoFit || isUnity) { y /= _displayScale; }
+		return y;
 	}
 	
-	public float sceneToPixelX(float x) {
-		x *= fitScale;
-		if(screenMode==U2D || screenMode==U3D) { x -= displayWidth * 0.5f; }
-		x += (displayWidth - width * displayScale) * 0.5f;
+	public float screenToPixelX(float x) {
+		if(isAutoFit || isUnity) { x *= _displayScale; }
+		if(isUnity) {
+			x += displayWidth * 0.5f;
+		} else {
+			x += displayOffsetX;
+		}
 		if(axis.x <= 0.0f) { x = displayWidth - x; }
 		return x;
 	}
 	
-	public float sceneToPixelY(float y) {
-		y *= fitScale;
-		if(screenMode==U2D || screenMode==U3D) { y = displayHeight * 0.5f - y; }
+	public float screenToPixelY(float y) {
+		if(isAutoFit || isUnity) { y *= _displayScale; }
+		if(isUnity) {
+			y = displayHeight * 0.5f - y;
+		} else {
+			y += displayOffsetY;
+		}
 		if(axis.y <= 0.0f) { y = displayHeight - y; }
 		return y;
 	}
 
-	public void layout2D() { useDepthStep = true; }
-	public void layout3D() { useDepthStep = false; }
+	public void layout2D() {
+		useDepthStep = true;
+		if(isUnity) { isUseBaseCoordinate = true; } // Use baseX(), baseY() automatic
+	}
+	public void layout3D() {
+		useDepthStep = false;
+		if(isUnity) { isUseBaseCoordinate = false; }
+	}
 
 	public bool mouseReleased { get { return mouseButtonUp != NONE; } }
 	public int mouseButtonUp {
@@ -1266,7 +1401,7 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	public RaycastHit raycastScreen(float x, float y, float distance=Mathf.Infinity) {
-		Ray ray = system.camera.ScreenPointToRay(new Vector3(sceneToPixelX(x), sceneToPixelY(y), Input.mousePosition.z));
+		Ray ray = system.camera.ScreenPointToRay(new Vector3(screenToPixelX(x), screenToPixelY(y), Input.mousePosition.z));
 		RaycastHit hitInfo;
 		Physics.Raycast(ray, out hitInfo, distance);
 		return hitInfo;

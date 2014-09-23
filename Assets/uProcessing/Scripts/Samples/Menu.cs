@@ -4,7 +4,7 @@ using System.Collections;
 public class Menu : PGraphics {
 
 	protected override void setup() {
-		size(200, 200, P2D);
+		size(200 * displayAspectW, 200, P2D);
 		recycle();
 	}
 	
