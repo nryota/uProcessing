@@ -4,10 +4,11 @@ using System.Collections;
 
 public class PEditor : PGraphics {
 
+	/*
 	[MenuItem ("GameObject/Create Other/uProcessing/Rect")]
 	static void AddRect() {
 		PShape shape = createPShapeObject("Rect");
-		shape.saveAssetDB(shape.createRect(0, 0, 1, 1));
+		shape.saveAssetDB(shape.createRect(-0.5f, -0.5f, 0.5f, 0.5f));
 	}
 
 	[MenuItem ("GameObject/Create Other/uProcessing/Ellipse")]
@@ -23,4 +24,5 @@ public class PEditor : PGraphics {
 		meshRenderer.material = new Material (Shader.Find ("Diffuse"));
 		return obj.AddComponent<PShape>();
 	}
+	*/
 }

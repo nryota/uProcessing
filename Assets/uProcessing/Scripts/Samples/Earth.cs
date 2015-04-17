@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Earth : PGraphics {
+public class Earth : uProcessing {
 	bool isStroke = false;
 	
 	protected override void setup() {
-		size(512, 512, P3D);
+		size(512 * displayAspectW, 512, P3D);
 		recycle();
 	}
 	

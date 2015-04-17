@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Primitives : PGraphics {
+public class Primitives : uProcessing {
 
 	protected override void setup() {
-		size(512, 512, P2D);
+		size(512 * displayAspectW, 512, P2D);
 		
 		stroke(0, 128, 64);
 		strokeWeight(20);

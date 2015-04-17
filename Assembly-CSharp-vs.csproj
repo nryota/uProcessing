@@ -19,7 +19,7 @@
 	<DebugType>full</DebugType>
 	<Optimize>false</Optimize>
 	<OutputPath>Temp\bin\Debug\</OutputPath>
-	<DefineConstants>DEBUG;TRACE;UNITY_4_5_0;UNITY_4_5;UNITY_STANDALONE_OSX;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_UNITYEVENTS;ENABLE_NEW_HIERARCHY ;ENABLE_AUDIO_FMOD;UNITY_STANDALONE;ENABLE_MONO;ENABLE_TERRAIN;ENABLE_SUBSTANCE;ENABLE_GENERICS;INCLUDE_WP8SUPPORT;ENABLE_MOVIES;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_WEBCAM;INCLUDE_METROSUPPORT;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_2D_PHYSICS;ENABLE_GAMECENTER;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_NAVMESH_CARVING;ENABLE_DUCK_TYPING;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_OSX</DefineConstants>
+	<DefineConstants>DEBUG;TRACE;UNITY_4_6_1;UNITY_4_6;UNITY_STANDALONE_OSX;ENABLE_MICROPHONE;ENABLE_TEXTUREID_MAP;ENABLE_UNITYEVENTS;ENABLE_NEW_HIERARCHY ;ENABLE_AUDIO_FMOD;UNITY_STANDALONE;ENABLE_MONO;ENABLE_TERRAIN;ENABLE_SUBSTANCE;ENABLE_GENERICS;INCLUDE_WP8SUPPORT;ENABLE_MOVIES;ENABLE_WWW;ENABLE_IMAGEEFFECTS;ENABLE_4_6_FEATURES;INCLUDE_WP_BLUE_SUPPORT;ENABLE_WEBCAM;INCLUDE_METROSUPPORT;RENDER_SOFTWARE_CURSOR;ENABLE_NETWORK;ENABLE_PHYSICS;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_2D_PHYSICS;ENABLE_GAMECENTER;ENABLE_SHADOWS;ENABLE_AUDIO;ENABLE_NAVMESH_CARVING;ENABLE_DUCK_TYPING;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_PROFILER;UNITY_EDITOR;UNITY_EDITOR_OSX</DefineConstants>
 	<ErrorReport>prompt</ErrorReport>
 	<WarningLevel>4</WarningLevel>
 	<NoWarn>0169</NoWarn>
@@ -46,6 +46,7 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\uProcessing\Libraries\MiniJSON.cs" />
      <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\FaceAnimation\FaceUpdate.cs" />
      <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\Scripts\IdleChanger.cs" />
      <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\Scripts\ThirdPersonCamera.cs" />
@@ -53,17 +54,27 @@
      <Compile Include="Assets\uProcessing\Scripts\Core\PGameObject.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Core\PGraphics.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Core\PImage.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Core\PJson.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Core\PMatrix.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Core\PShape.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Core\PWireframe.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Core\uProcessing.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Extra\PSound.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Extra\PTween.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Action.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Samples\Dialog.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Earth.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\HelloWorld.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Images.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Samples\JsonData.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Samples\ListView.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Menu.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Performance.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Primitives.cs" />
      <Compile Include="Assets\uProcessing\Scripts\Samples\Pteridophyte.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Samples\Shapes.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Samples\Sounds.cs" />
+     <Compile Include="Assets\uProcessing\Scripts\Samples\Tweens.cs" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eye.shader" />
      <None Include="Assets\uProcessing\Materials\fillShader.shader" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_fuku.shader" />
@@ -76,6 +87,10 @@
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eyelash_blend.shader" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada.shader" />
      <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada_blend.shader" />
+     <None Include="Assets\uProcessing\Resources\PSamples\strings.txt" />
+ <Reference Include="UnityEngine.UI">
+ <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/4.6.1/UnityEngine.UI.dll</HintPath>
+ </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

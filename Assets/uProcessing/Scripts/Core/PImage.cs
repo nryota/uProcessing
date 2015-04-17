@@ -4,6 +4,8 @@ using System.IO;
 
 public class PImage : MonoBehaviour {
 
+	public System.Object customData; // UserCustomData
+
 	internal PGraphics graphics;
 	public Texture2D texture;
 
@@ -24,8 +26,9 @@ public class PImage : MonoBehaviour {
 
 	#region Processing Extra Members
 	public void load(string path) {
-		if(path.StartsWith("http://")) {
+		if(path.StartsWith("http://") || path.StartsWith("file://")) {
 			StartCoroutine("loadFromURL", path);
+			graphics.debuglog("loadImage:loadFromURL " + path);
 		} else {
 			if(!loadFromResources(path)) {
 				loadFromLocalFile(path);
@@ -51,6 +54,8 @@ public class PImage : MonoBehaviour {
 	bool loadFromResources(string path) {
 		Texture2D tex = Resources.Load(path) as Texture2D;
 		set(tex);
+		if(tex!=null) { graphics.debuglog("loadImage:loadFromResources " + path); }
+		else { graphics.debuglogWaring("loadImage:loadFromResources <Failed> " + path); }
 		return tex!=null;
 	}
 
@@ -61,15 +66,25 @@ public class PImage : MonoBehaviour {
 	}
 
 	bool loadFromLocalFile(string path) {
-		if(!File.Exists(path)) return false;
+		if(!File.Exists(path)) {
+			graphics.debuglogWaring("loadImage:loadFromLocalFile <NotFound> " + path);;
+			return false;
+		}
+		byte[] bytes = null;
+
 		FileStream fs = new FileStream(path, FileMode.Open);
-		BinaryReader bin = new BinaryReader(fs);
-		byte[] bytes = bin.ReadBytes((int)bin.BaseStream.Length);
-		bin.Close();
+		using(BinaryReader bin = new BinaryReader(fs)) {
+			bytes = bin.ReadBytes((int)bin.BaseStream.Length);
+		}
 
 		Texture2D tex = new Texture2D(0, 0);
 		tex.LoadImage(bytes);
 		set(tex);
+
+		if(tex!=null) { graphics.debuglog("loadImage:loadFromLocalFile " + path); }
+		else { graphics.debuglogWaring("loadImage:loadFromLocalFile <Failed> " + path); }
 		return tex!=null;
 	}
+
+	public PGameObject pgameObject { get { return GetComponent<PGameObject>(); } }
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Menu : PGraphics {
+public class Menu : uProcessing {
 
 	protected override void setup() {
 		size(200 * displayAspectW, 200, P2D);
@@ -10,46 +10,39 @@ public class Menu : PGraphics {
 	
 	protected override void draw() {
 		background(128);
-
 		noStroke();
-		translate(screenOffsetX, screenOffsetY);
 
 		float s = 5;
 		float x = s;
 		float y = s;
-		float w = screenWidth / 2 - s * 2;
-		float h = screenHeight / 3 - s * 2;
+		float w = width / 2 - s * 2;
+		float h = height / 3 - s * 2;
 		int ts = 15;
 
-		if(button("Hello World", color(0, 255, 0), ts, x, y, w, h)) {
+		if(button("Hello World", color(0, 255, 0), x, y, w, h, ts)) {
 			loadScene("HelloWorld");
 		}
 		
-		if(button("Primitives", color(0, 128, 255), ts, x + s + w, y, w, h)) {
+		if(button("Primitives", color(0, 128, 255), x + s + w, y, w, h, ts)) {
 			loadScene("Primitives");
 		}
 		
 		y += s + h;
-		if(button("Images", color(255, 0, 0), ts, x, y, w, h)) {
+		if(button("Images", color(255, 0, 0), x, y, w, h, ts)) {
 			loadScene("Images");
 		}
 
-		/*
-		if(button("Pteridophyte", color(255, 128, 0), ts, x + s + w, y, w, h)) {
-			loadScene("Pteridophyte");
-		}
-		*/
-		if(button("Performance", color(255, 128, 0), ts, x + s + w, y, w, h)) {
-			loadScene("Performance");
+		if(button("Earth", color(255, 128, 0), x + s + w, y, w, h, ts)) {
+			loadScene("Earth");
 		}
 
 		y += s + h;
-		if(button("Earth", color(0, 0, 255), ts, x, y, w, h)) {
-			loadScene("Earth");
+		if(button("Action", color(0, 0, 255), x, y, w, h, ts)) {
+			loadScene("Action");
 		}
 		
-		if(button("Action", color(255, 0, 255), ts, x + s + w, y, w, h)) {
-			loadScene("Action");
+		if(button("ListView", color(255, 0, 255), x + s + w, y, w, h, ts)) {
+			loadScene("ListView");
 		}
 
 		textSize(6); textAlign(LEFT, TOP);
@@ -57,21 +50,8 @@ public class Menu : PGraphics {
 		     "mouse pos (" + mouseX + ", " + mouseY + ")", 10, height - 10);
 	}
 
-	public bool button(string name, Color col, int textSize, float x, float y, float w, float h) {
-		float sx = x + screenOffsetX;
-		float sy = y + screenOffsetY;
-		bool isOnCursor = (mouseX > sx  && mouseX < sx + w && mouseY > sy && mouseY < sy + h);
-		if(isOnCursor) { stroke(255); strokeWeight(5); }
-		else { noStroke(); }
-
-		fill(col);
-		rect(x, y, w, h);
-
-		fill(255);
-		this.textSize(textSize);
-		textAlign(CENTER, CENTER);
-		text(name, x + w/2, y + h/2);
-
-		return isOnCursor && mousePressed;
+	public bool button(string name, Color col, float x, float y, float w, float h, int textSize) {
+		uiColor(col, col);
+		return button(name, x, y, w, h, textSize);
 	}
 }

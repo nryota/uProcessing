@@ -20,11 +20,11 @@ public class PWireframe : MonoBehaviour {
 		if (strokeMaterial == null) {
 			strokeMaterial = new Material ("Shader \"Custom/wireframeShader\" {" +
 			                        	   "SubShader { " + 
-			                               "Tags { \"RenderType\"=\"Transparent\" }" +
+			                               "Tags { \"Queue\"=\"Transparent\" \"RenderType\"=\"Transparent\" }" +
 			                               "Pass {" +
 			                           	   "   BindChannels { Bind \"Color\",color }" +
 			                               "   Blend SrcAlpha OneMinusSrcAlpha" +
-			                               "   ZWrite On ZTest LEqual Cull Off Fog { Mode Off }" +
+			                               "   ZWrite On ZTest Less Cull Off Fog { Mode Off }" +
 			                               "} } }");
 			strokeMaterial.hideFlags = HideFlags.HideAndDontSave;
 			strokeMaterial.shader.hideFlags = HideFlags.HideAndDontSave;

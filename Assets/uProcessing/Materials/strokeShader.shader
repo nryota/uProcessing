@@ -4,15 +4,17 @@
     }
 
     SubShader {
-		Tags { "RenderType"="Transparent" }
+		Tags {"Queue"="Transparent" "RenderType"="Transparent" }
         Pass {
 	        Blend SrcAlpha OneMinusSrcAlpha
 	        Color[_Color]
             Lighting Off
             ZWrite On
+            ZTest Less
             Cull Off
             Fog { Mode Off }
         }
     }
-	FallBack "Diffuse"
+    
+	Fallback "Transparent/VertexLit"
 } 

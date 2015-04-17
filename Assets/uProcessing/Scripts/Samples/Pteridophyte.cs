@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Pteridophyte : PGraphics {
+public class Pteridophyte : uProcessing {
 	float x = 0.0f;
 	float y = 0.0f;
 	const int RATIO = 59;
@@ -48,6 +48,6 @@ public class Pteridophyte : PGraphics {
 	}
 
 	protected override void onKeyTyped() {
-		if(key == ESC) { loadScene("Menu"); }
+		if(key == ESC) { loadScene("ListView"); }
 	}
 }

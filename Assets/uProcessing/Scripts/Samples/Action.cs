@@ -2,16 +2,15 @@
 using System.Collections;
 //using PVector = UnityEngine.Vector3;
 
-public class Action : PGraphics {
+public class Action : uProcessing {
 
 	[SerializeField] UnityChan unityChan = new UnityChan();
-	[SerializeField] int LAYER_2D = 7;
 	PImage unityChanLogo;
-	Vector3 cameraPos;
+	Vector3 cameraPos = new Vector3();
 
 	protected override void setup() {
 		layerMaskEverything();
-		removeLayerMask(LAYER_2D);
+		removeLayerMask("UI");
 
 		size(500 * displayAspectW, 500, U3D, 1.0f);
 
@@ -22,7 +21,7 @@ public class Action : PGraphics {
 
 	protected override void draw() {
 		layerMaskEverything();
-		removeLayerMask(LAYER_2D);
+		removeLayerMask("UI");
 		layout3D();
 
 		backgroundSkybox();
@@ -63,10 +62,7 @@ public class Action : PGraphics {
 	}
 
 	void draw2D() {
-		layerAndMask(LAYER_2D);
-		layout2D();
-		ortho();
-		noLights();
+		layer2D("UI");
 
 		fill(255);
 		textSize(14); textAlign(LEFT, BOTTOM);
@@ -74,6 +70,8 @@ public class Action : PGraphics {
 		image(unityChanLogo,
 		      width - unityChanLogo.width - 10, height - unityChanLogo.height - 10,
 		      unityChanLogo.width, unityChanLogo.height);
+
+		if(button("Back", 10, 10, 100, 25)) { loadScene("Menu"); }
 	}
 	
 	protected override void onKeyTyped() {
@@ -91,7 +89,7 @@ class UnityChan {
 
 	public PGameObject obj;
 	PGraphics g;
-	Vector3 velocity;
+	Vector3 velocity = new Vector3();
 	
 	public void init(PGraphics graphics) {
 		g = graphics;

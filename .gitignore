@@ -5,3 +5,4 @@ Temp
 *.sln
 *.userprefs
 .DS_Store
+Assets/AssetStoreTools*

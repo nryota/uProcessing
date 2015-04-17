@@ -21,3 +21,15 @@ EditorBuildSettings:
     path: Assets/uProcessing/Scenes/Action.unity
   - enabled: 1
     path: Assets/uProcessing/Scenes/Performance.unity
+  - enabled: 1
+    path: Assets/uProcessing/Scenes/Dialog.unity
+  - enabled: 1
+    path: Assets/uProcessing/Scenes/ListView.unity
+  - enabled: 1
+    path: Assets/uProcessing/Scenes/Shapes.unity
+  - enabled: 1
+    path: Assets/uProcessing/Scenes/JsonData.unity
+  - enabled: 1
+    path: Assets/uProcessing/Scenes/Sounds.unity
+  - enabled: 1
+    path: Assets/uProcessing/Scenes/Tweens.unity

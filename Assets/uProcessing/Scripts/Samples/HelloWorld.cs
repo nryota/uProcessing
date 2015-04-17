@@ -1,15 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HelloWorld : PGraphics {
+public class HelloWorld : uProcessing {
 
 	protected override void setup () {
-		size(512, 512);
+		size(512 * displayAspectW, 512);
 		background(0, 128, 0);
 		textSize(70);
-		text("Hello World!", 50, height/2);
+		text("Hello World!", 50, height/2 - 20);
 		textSize(24);
-		text("と、UnityでProcessingっぽく書ける", 50, height/2 + 50);
+		text("と、UnityでProcessingっぽく書ける", 50, height/2 + 30);
+		textSize(18);
+		text("ESCキーでMenuへ", 50, height - 30);
 		noLoop();
 	}
 

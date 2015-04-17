@@ -3,10 +3,16 @@ using System.Collections;
 
 public class PGameObject : MonoBehaviour {
 
+	public System.Object customData; // UserCustomData
+
 	internal PGraphics graphics;
 	public PGraphics g { get { return graphics; } }
 
+	internal Color _color;
+	internal Color _strokeColor;
+
 	internal uint primitiveKey = 0;
+	internal uint objFrameCount = 0;
 
 	public enum PrimitiveType {
 		None,
@@ -16,6 +22,8 @@ public class PGameObject : MonoBehaviour {
 		Box,
 		Sphere,
 		Text,
+		Shape2D,
+		Shape3D,
 	}
 	public PrimitiveType primitiveType = PrimitiveType.None;
 
@@ -25,7 +33,14 @@ public class PGameObject : MonoBehaviour {
 		}
 	}
 
+	protected virtual void Start() {
+		//setup();
+	}
+
 	#region Processing Object Members
+	public virtual void setup() {}
+	public virtual void draw() {}
+
 	public PGraphics beginDraw() {
 		graphics.beginDraw(this);
 		graphics.pushMatrix();
@@ -33,38 +48,38 @@ public class PGameObject : MonoBehaviour {
 		return graphics;
 	}
 	public void endDraw() {
+		graphics.popStyle();
+		graphics.popMatrix();
 		graphics.endDraw();
 	}
 
 	public PGraphics beginRecycleDraw(short id) {
-		graphics.beginDraw(this);
+		beginDraw();
 		graphics.beginRecycle(id);
-		graphics.pushMatrix();
-		graphics.pushStyle();
+		return graphics;
+	}
+	public PGraphics beginNoRecycleDraw() {
+		beginDraw();
+		graphics.beginNoRecycle();
 		return graphics;
 	}
 	public void endRecycleDraw() {
-		graphics.popStyle();
-		graphics.popMatrix();
-		graphics.endKeep();
 		graphics.endRecycle();
+		endDraw();
 	}
-
 	public PGraphics beginKeepDraw() {
-		graphics.beginDraw(this);
+		beginDraw();
 		graphics.beginKeep();
-		graphics.pushMatrix();
-		graphics.pushStyle();
 		return graphics;
 	}
 	public void endKeepDraw() {
-		graphics.popStyle();
-		graphics.popMatrix();
 		graphics.endKeep();
-		graphics.endDraw();
+		endDraw();
 	}
 
 	public void translate(float x, float y, float z=0.0f) { gameObject.transform.Translate(graphics.toScene(x, y, z)); }
+	public void scale(float s) { gameObject.transform.localScale = new Vector3(s, s, s); }
+	public void scale(float x, float y, float z=1.0f) { gameObject.transform.localScale = new Vector3(x, y, z); }
 	public void tint(int gray, int alpha = 255) { tint(PGraphics.color(gray, alpha)); }
 	public void tint(int r, int g, int b, int a = 255) { tint(PGraphics.color(r, g, b, a)); }
 	public void tint(Color col) { graphics.tint(this, col); }
@@ -82,12 +97,37 @@ public class PGameObject : MonoBehaviour {
 
 	#region Processing Extra Members
 	public Vector3 pos {
+		get { return graphics.toP5Coordinate(transform.position); }
+		set { transform.position = graphics.toSceneCoordinate(value); }
+	}
+	public Vector3 localPos {
+		get { return graphics.toP5Coordinate(transform.localPosition); }
+		set { transform.localPosition = graphics.toSceneCoordinate(value); }
+	}
+	public Vector3 scenePos {
+		get { return transform.position; }
+		set { transform.position = value; }
+	}
+	public Vector3 localScenePos {
 		get { return transform.localPosition; }
 		set { transform.localPosition = value; }
 	}
 	public Quaternion rot {
 		get { return transform.localRotation; }
 		set { transform.localRotation = value; }
+	}
+
+	public Color color {
+		get { return _color; }
+		set {
+			_color = value;
+			if(isImage) { tint(_color); }
+			else { fill(_color); }
+		}
+	}
+	public Color strokeColor {
+		get { return _strokeColor; }
+		set { _strokeColor = value; stroke(_strokeColor); }
 	}
 
 	public PGameObject addChild(PGameObject obj) {
@@ -105,11 +145,17 @@ public class PGameObject : MonoBehaviour {
 	public Rigidbody addRigid() { return gameObject.AddComponent<Rigidbody>(); }
 	public Rigidbody2D addRigid2D() { return gameObject.AddComponent<Rigidbody2D>(); }
 
+	public string label { 
+		get { var tm = gameObject.GetComponent<TextMesh>(); return tm ? tm.text : null; }
+		set { var tm = gameObject.GetComponent<TextMesh>(); if(tm) { tm.text = value; } }
+	}
+
 	public PWireframe wireframe { get { return GetComponent<PWireframe>(); } }
 	public bool isLine { get { return GetComponent<LineRenderer>()!=null; } }
 	public bool isImage { get { return GetComponent<PImage>()!=null; } }
 	public bool isText { get { return GetComponent<TextMesh>()!=null; } }
-
+	public bool is2D { get { return primitiveType==PrimitiveType.Rect || primitiveType==PrimitiveType.Ellipse || primitiveType==PrimitiveType.Line || primitiveType==PrimitiveType.Text || primitiveType==PrimitiveType.Shape2D; } } 
+	
 	public RaycastHit raycastScreen() { return graphics.raycastScreen(); }
 	public bool isHitMouse { get {
 			RaycastHit hit = graphics.raycastScreen();
@@ -117,8 +163,13 @@ public class PGameObject : MonoBehaviour {
 		}
 	}
 
-	public bool is2D { get { return primitiveType==PrimitiveType.Rect || primitiveType==PrimitiveType.Ellipse || primitiveType==PrimitiveType.Line || primitiveType==PrimitiveType.Text; } } 
-
-	public void destroy() { Destroy(gameObject); }
+	public void destroy() {
+		// ToDo: destroy children
+		if(g!=null) {
+			g.destroyObject(this);
+		} else {
+			Destroy(gameObject);
+		}
+	}
 	#endregion
 }
