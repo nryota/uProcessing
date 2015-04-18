@@ -100,7 +100,22 @@ recycle()の場合、GameObjectは消さずに使いまわすとはいえ、毎�
 
 PGraphicsのIsEnableMaterialPBをtrueにしておく（デフォルトでtrue）とマテリアルをインスタンスごとに複製せずに色を指定するようになります。
 
-PGraphicsを継承したuProcessingクラスの方を使うと、playBGM()、PlaySE()でサウンドを鳴らしたり、tween()で数値、座標、色などを補間したり、button()やdialog()で簡易的なユーザーインターフェイスを表示したりもできます。詳しくは各サンプルをご覧ください。サウンド用のPSoundや補間用のPTweenはuProcessingとは独立して使うこともできます。
+PGraphicsを継承したuProcessingクラスの方を使うと、playBGM()、PlaySE()でサウンドを鳴らしたり、tween()で数値、座標、色などを補間したり、button()やdialog()で簡易的なユーザーインターフェイスを表示したりもできます。
+
+補間処理の例をあげるとこんな感じです。
+
+	// int型の数値で255から0の値に1秒かけて補間する
+	PTween t = tween(255, 0, 1.0f, PEase.InCubic);
+	//int value = (int)t.Value;
+
+	// メンバ変数のColor colを灰色から緑に0.5秒かけて補間して
+	tween(this, "col", Color.gray, Color.green, 0.5f, PEase.OutQuad)
+		.wait(1.0f) // 1秒待って
+		.to(Color.red, 1.0f, PEase.Linear) // さらに赤に1秒で補間し
+		.reverse()  // これまでの補間の流れを逆にして最初に戻る
+		.loop();    // それを繰り返す
+
+詳しくは各サンプルをご覧ください。サウンド用のPSoundや補間用のPTweenはuProcessingとは独立して使うこともできます。
 
 
 Attention
