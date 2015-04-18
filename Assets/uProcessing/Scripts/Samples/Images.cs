@@ -9,8 +9,8 @@ public class Images : uProcessing {
 	protected override void setup() {
 		size(512 * displayAspectW, 512);
 
-		bg = loadImage("PSamples/bg");
-		apple = loadImage("PSamples/apple");
+		bg = loadImage("PSamples/bg", 512, 512);
+		apple = loadImage("PSamples/apple", 64, 64);
 
 		recycle();
 	}

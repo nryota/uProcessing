@@ -8,6 +8,8 @@ public class PImage : MonoBehaviour {
 
 	internal PGraphics graphics;
 	public Texture2D texture;
+	public int width = 0, height = 0;
+	public int abc = 0;
 
 	#region Processing Members
 	public Color get(int x, int y) {
@@ -20,8 +22,8 @@ public class PImage : MonoBehaviour {
 		texture.SetPixel(x, y, c);
 	}
 
-	public int width { get { return texture.width; } }
-	public int height { get { return texture.height; } }
+	public int texWidth { get { return texture.width; } }
+	public int texHeight { get { return texture.height; } }
 	#endregion
 
 	#region Processing Extra Members
@@ -38,13 +40,15 @@ public class PImage : MonoBehaviour {
 
 	public void set(PImage img) {
 		set(img.texture);
+		width = img.width;
+		height = img.height;
 	}
 	
 	public void set(Texture2D tex) {
 		if(texture!=tex) {
 			texture = tex;
 			if(gameObject && gameObject.renderer && gameObject.renderer.material) {
-				if(graphics) { gameObject.renderer.material.mainTextureScale = graphics.axis2D; }
+				//if(graphics) { gameObject.renderer.material.mainTextureScale = graphics.axis2D; }
 				gameObject.renderer.material.mainTexture = tex;
 			}
 		}
@@ -52,10 +56,15 @@ public class PImage : MonoBehaviour {
 	#endregion
 
 	bool loadFromResources(string path) {
-		Texture2D tex = Resources.Load(path) as Texture2D;
+		string resPath = graphics.getResourceName(path);
+		Texture2D tex = Resources.Load(resPath) as Texture2D;
 		set(tex);
-		if(tex!=null) { graphics.debuglog("loadImage:loadFromResources " + path); }
-		else { graphics.debuglogWaring("loadImage:loadFromResources <Failed> " + path); }
+		if(tex!=null) {
+			graphics.debuglog("loadImage:loadFromResources " + resPath);
+			if(width==0) width = texWidth;
+			if(height==0) height = texHeight;
+		}
+		else { graphics.debuglogWaring("loadImage:loadFromResources <Failed> " + resPath); }
 		return tex!=null;
 	}
 
@@ -63,6 +72,8 @@ public class PImage : MonoBehaviour {
 		WWW web = new WWW(url);
 		yield return web;
 		set(web.texture);
+		if(width==0) width = texWidth;
+		if(height==0) height = texHeight;
 	}
 
 	bool loadFromLocalFile(string path) {
@@ -81,7 +92,11 @@ public class PImage : MonoBehaviour {
 		tex.LoadImage(bytes);
 		set(tex);
 
-		if(tex!=null) { graphics.debuglog("loadImage:loadFromLocalFile " + path); }
+		if(tex!=null) {
+			graphics.debuglog("loadImage:loadFromLocalFile " + path);
+			if(width==0) width = texWidth;
+			if(height==0) height = texHeight;
+		}
 		else { graphics.debuglogWaring("loadImage:loadFromLocalFile <Failed> " + path); }
 		return tex!=null;
 	}

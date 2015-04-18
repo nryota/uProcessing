@@ -414,7 +414,9 @@ public class PGraphics : MonoBehaviour {
 			obj.transform.localPosition = newPos;
 
 			trans.localRotation = system.work.localRotation;
+			//trans.localScale = Vector3.Scale(system.work.localScale, sceneScale * scale);
 			trans.localScale = Vector3.Scale(system.work.localScale, toScene(scale));
+
 			if(obj.renderer) {
 				Color col;
 				if(obj.isImage) col = system.style.tintColor;
@@ -1322,12 +1324,15 @@ public class PGraphics : MonoBehaviour {
 			}
 		}
 		SetProperty(obj, new Vector3(x, y, 0), axis);
+		//SetProperty(obj, new Vector3(x, y, 0), Vector3.one);
 		return obj;
 	}
 
-	public PImage loadImage(string path) {
+	public PImage loadImage(string path, int width = 0, int height = 0) {
 		PImage img = system.work.gameObject.AddComponent<PImage>();
 		img.graphics = this;
+		img.width = width;
+		img.height = height;
 		img.load(path);
 		img.gameObject.SetActive(false);
 		return img;
@@ -1360,7 +1365,8 @@ public class PGraphics : MonoBehaviour {
 			if(obj.wireframe) Destroy(obj.gameObject.GetComponent<PWireframe>());
 		}
 		objImg.set(img);
-		SetProperty(obj, p, new Vector3(w, h, sceneScaleAxis.z)); // rect prefab side
+		//SetProperty(obj, p, new Vector3(w, h, sceneScaleAxis.z)); // rect prefab side
+		SetProperty(obj, p, new Vector3(axis.x * w, axis.y * h, axis.z * sceneScaleAxis.z)); // rect prefab side
 		return obj;
 	}
 
