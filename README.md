@@ -115,7 +115,7 @@ PGraphicsを継承したuProcessingクラスの方を使うと、playBGM()、Pla
 		.reverse()  // これまでの補間の流れを逆にして最初に戻る
 		.loop();    // それを繰り返す
 
-詳しくは各サンプルをご覧ください。サウンド用のPSoundや補間用のPTweenはuProcessingとは独立して使うこともできます。
+詳しくは各サンプルをご覧ください。サウンド用のPSoundや補間用のPTweenerはuProcessingとは独立して使うこともできます。
 
 
 Attention
