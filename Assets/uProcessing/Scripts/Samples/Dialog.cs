@@ -17,7 +17,7 @@ public class Dialog : uProcessing {
 		layer2D();
 		noRecycle();
 		if(isDispDialog) {
-			switch(dialog("Go to Menu?", "OK", "Cancel")) {
+			switch(dialog("メニューに戻りますか？", "OK", "Cancel")) {
 			case UIResponse.OK:
 				loadScene("Menu");
 				break;
