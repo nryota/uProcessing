@@ -15,7 +15,6 @@ Unity 4を対象としています。
 
 ![基本画面](http://cafe.eyln.com/GitHub/uProcessing/screenshot.png "ScreenShot")
 
-
 #### Primitives.cs
     
 	using UnityEngine;
@@ -46,17 +45,33 @@ Unity 4を対象としています。
 		}
 	}
 
+
+Updates
+--------
+
+#### 2015.4.17
+
+テキストやJsonの読み込み、保存、jsonにも対応したり、PShapeを使って星型のプリミティブを作ったりなどもできるようになりました。
+その他、ボタン表示やサウンド再生、Tweenerによる補間機能なんかも入ってます。サンプルも増やしました。
+いろいろ再設計したいところが多いものの、ひとまずアップ。Unity4.6でしか確認してません。
+
+
 Samples
 -------
 Assets/uProcessing/Scenesに各種サンプルシーンが入っています。
 Menuのシーンから各シーンを呼び出せて、各シーンでESCキーを押すとMenuのシーンに戻れます。
 
-![サンプル画面1](http://cafe.eyln.com/GitHub/uProcessing/hello.png "hello")
-![サンプル画面2](http://cafe.eyln.com/GitHub/uProcessing/menu.png "menu")
-![サンプル画面3](http://cafe.eyln.com/GitHub/uProcessing/primitives.png "primitives")
-![サンプル画面4](http://cafe.eyln.com/GitHub/uProcessing/pteridophyte.png "pteridophyte")
-![サンプル画面5](http://cafe.eyln.com/GitHub/uProcessing/earth.png "earth")
-![サンプル画面6](http://cafe.eyln.com/GitHub/uProcessing/action.png "action")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/hello.png "hello")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/menu.png "menu")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/primitives.png "primitives")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/earth.png "earth")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/shapes.png "shapes")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/performance.png "performance")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/dialog.png "dialog")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/jsondata.png "jsondata")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/tweens.png "tweens")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/sounds.png "sounds")
+![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/action.png "action")
 
 
 Extras
@@ -81,7 +96,10 @@ recycle()の場合、GameObjectは消さずに使いまわすとはいえ、毎�
 
 #### 拡張
 その他、prefab()でPrefabから生成できたり、loadScene()でシーンをロードできたりといったUnity的な便利関数も一部追加しています。
+
 PGraphicsのIsEnableMaterialPBをtrueにしておく（デフォルトでtrue）とマテリアルをインスタンスごとに複製せずに色を指定するようになります。
+
+PGraphicsを継承したuProcessingクラスの方を使うと、playBGM()、PlaySE()でサウンドを鳴らしたり、tween()で数値、座標、色などを補間したり、button()やdialog()で簡易的なユーザーインターフェイスを表示したりもできます。詳しくは各サンプルをご覧ください。サウンド用のPSdoundや補間用のPTweenはuProcessingとは独立して使うこともできます。
 
 
 Attention
