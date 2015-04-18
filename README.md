@@ -59,7 +59,7 @@ Updates
 Samples
 -------
 Assets/uProcessing/Scenesに各種サンプルシーンが入っています。
-Menuのシーンから各シーンを呼び出せて、各シーンでESCキーを押すとMenuのシーンに戻れます。
+Menuのシーンから各シーンを呼び出せて、各シーンでESCキーを押すと前のシーンに戻れます。
 
 ![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/hello.png "hello")
 ![サンプル画面](http://cafe.eyln.com/GitHub/uProcessing/menu.png "menu")
@@ -99,7 +99,7 @@ recycle()の場合、GameObjectは消さずに使いまわすとはいえ、毎�
 
 PGraphicsのIsEnableMaterialPBをtrueにしておく（デフォルトでtrue）とマテリアルをインスタンスごとに複製せずに色を指定するようになります。
 
-PGraphicsを継承したuProcessingクラスの方を使うと、playBGM()、PlaySE()でサウンドを鳴らしたり、tween()で数値、座標、色などを補間したり、button()やdialog()で簡易的なユーザーインターフェイスを表示したりもできます。詳しくは各サンプルをご覧ください。サウンド用のPSdoundや補間用のPTweenはuProcessingとは独立して使うこともできます。
+PGraphicsを継承したuProcessingクラスの方を使うと、playBGM()、PlaySE()でサウンドを鳴らしたり、tween()で数値、座標、色などを補間したり、button()やdialog()で簡易的なユーザーインターフェイスを表示したりもできます。詳しくは各サンプルをご覧ください。サウンド用のPSoundや補間用のPTweenはuProcessingとは独立して使うこともできます。
 
 
 Attention
