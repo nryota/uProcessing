@@ -764,6 +764,7 @@ public class PTweener {
 	}
 
 	// 補間クラス作成
+	// targetObj
 	// target
 	// from
 	// to
@@ -772,9 +773,11 @@ public class PTweener {
 	// onComplete
 	// delay
 	// isLoop
-	public static PTween tween(object obj, params object[] props) {
+	public static PTween _tween(params object[] props) {
 		PTweenArgs args = new PTweenArgs (props);
-		
+
+		object obj = args.getValue<object>("targetObj", null);
+
 		PTweenEaseFunc easeFunc = args.getValue<PTweenEaseFunc>("easeType", PEase.Linear);
 		float duration = args.getValue<float>("duration", "time", 1.0f);
 		return tween(obj, duration, easeFunc, props);

@@ -65,7 +65,7 @@ public class JSONArray {
 	public void load(PGraphics graphics, string path, Action<JSONArray> onComplete = null) {
 		graphics.loadStringText(path, strings => {
 			onLoadComplete(strings);
-			onComplete(this);
+			if(onComplete!=null) { onComplete(this); }
 		});
 	}
 
