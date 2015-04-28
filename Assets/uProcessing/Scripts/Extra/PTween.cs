@@ -32,9 +32,14 @@ public interface PTween {
 	PTween LastTween { get; }
 	bool isLoop { get; set; }
 	bool isAutoRemove { get; set; }
+	bool isRemove { get; set; }
 	object Value { get; }
 	Type ValueType { get; }
 	float Duration { get; }
+	bool isRunning { get; }
+	bool isPaused { get; }
+	bool isStopped { get; }
+	bool isCompleted { get; }
 
 	void pause();
     void resume();
@@ -73,6 +78,8 @@ public class PTween<T> : PTween where T : struct {
 
 	public bool isLoop { get; set; }
 	public bool isAutoRemove { get; set; }
+	bool isRemoveFlag = false;
+	public bool isRemove { get { return isRemoveFlag; } set { isRemoveFlag = value; } }
 
 	private TweenTarget target;
 	public PTweenOnComplete onComplete;
@@ -401,18 +408,18 @@ public class PTween<T> : PTween where T : struct {
     }
 
 	public bool update(float elapsedTime) {
-		if (timer.state == PTweenState.Stopped || timer.state == PTweenState.Paused) {
+		if(isRemove || timer.state == PTweenState.Stopped || timer.state == PTweenState.Paused) {
 			return true;
 		}
 
 		bool isComplete = false;
-		if (timer.currentTime < timer.duration) {
+		if(timer.currentTime < timer.duration) {
 			timer.currentTime += elapsedTime * Mathf.Abs(timer.speed);
-			if (timer.currentTime >= timer.duration) {
-				if (nextTween == null) {
+			if(timer.currentTime >= timer.duration) {
+				if(nextTween == null) {
 					timer.state = PTweenState.Finished;
 					isComplete = true;
-				} else if (timer.state!=PTweenState.Completed) {
+				} else if(timer.state!=PTweenState.Completed) {
 					timer.state = PTweenState.Completed;
 					elapsedTime = timer.currentTime - timer.duration;
 					isComplete = true;
@@ -678,19 +685,23 @@ public class PTweener {
 
 	public static bool removeOne(PTween tween) {
 		if(tween==null) return false;
-		tweens.Remove(tween);
+		//tweens.Remove(tween);
+		tween.isRemove = true;
 		return true;
 	}
 
 	public static bool remove(PTween tween) { // remove Group
 		if(tween==null) return false;
 		for(PTween t = tween.NextTween; t!=null; t = t.NextTween) {
-			tweens.Remove(t);
+			//tweens.Remove(t);
+			t.isRemove = true;
 		}
 		for(PTween t = tween.PrevTween; t!=null; t = t.PrevTween) {
-			tweens.Remove(t);
+			//tweens.Remove(t);
+			t.isRemove = true;
 		}
-		tweens.Remove(tween);
+		//tweens.Remove(tween);
+		tween.isRemove = true;
 		return true;
 	}
 
@@ -704,7 +715,7 @@ public class PTweener {
 				t.update(elapsedTime);
 			}
 		}
-		tweens.RemoveAll(t => (t.State == PTweenState.Finished && t.isAutoRemove));
+		tweens.RemoveAll(t => (t.isRemove) || (t.State == PTweenState.Finished && t.isAutoRemove));
 	}
 
 	// 補間クラス作成
