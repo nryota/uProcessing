@@ -45,6 +45,7 @@ public class uProcessing : PGraphics {
 	private PUIStyle uiStyle;
 	private Stack<PUIStyle> uiStyleStack = new Stack<PUIStyle>();
 	private bool uiClickUp = true;
+	private bool uiIsPauseMouse = false;
 
 	private PGameObject pg2D;
 	#endregion
@@ -60,7 +61,20 @@ public class uProcessing : PGraphics {
 		PTweener.update();
 		base.UpdateOneLoop();
 	}
-	
+
+	protected override void UpdateOneInput() {
+		base.UpdateOneInput();
+		if(uiIsPauseMouse) {
+			uiMousePressed = false;
+			uiMouseReleased = false;
+		} else {
+			uiMouseX = mouseX;
+			uiMouseY = mouseY;
+			uiMousePressed = mousePressed;
+			uiMouseReleased = mouseReleased;
+		}
+	}
+
 	protected override void PreDestory() {
 		PTweener.clear();
 		if(isClearSound) {
@@ -138,6 +152,13 @@ public class uProcessing : PGraphics {
 	public static void clearBGM() { PSound.clearBGM(); }
 
 	// UI
+	public int uiMouseX { get; private set; } 
+	public int uiMouseY { get; private set; } 
+	public bool uiMousePressed { get; private set; } 
+	public bool uiMouseReleased { get; private set; } 
+	public void uiPauseMouse() { uiIsPauseMouse = true; }
+	public void uiNoPauseMouse() { uiIsPauseMouse = false; }
+
 	public void layer2D(string layerName = "UI") {
 		// 3D camera
 		if(system.cameraNum <= 0 && is3D) { perspective (); }
@@ -194,7 +215,7 @@ public class uProcessing : PGraphics {
 
 		PMatrix matrix = getMatrix();
 		matrix.invert();
-		Vector3 mv = matrix.mult(new Vector3(mouseX, mouseY));
+		Vector3 mv = matrix.mult(new Vector3(uiMouseX, uiMouseY));
 
 		//bool isActive = (mouseX > x  && mouseX < x + w && mouseY > y && mouseY < y + h);
 		bool isActive = (mv.x > x  && mv.x < x + w && mv.y > y && mv.y < y + h);
@@ -214,7 +235,7 @@ public class uProcessing : PGraphics {
 
 		popMatrix(objName);
 		popStyle();
-		bool isClick = uiClickUp ? mouseReleased : mousePressed;
+		bool isClick = uiClickUp ? uiMouseReleased : uiMousePressed;
 		if(isActive && isClick) {
 			buttonClick(uiStyle.groupName, name, obj);
 		}
