@@ -52,7 +52,9 @@ public class uProcessing : PGraphics {
 
 	#region System
 	protected override void PreSetup() {
-		if(isEnableSound) { PSound.setup(); }
+		if(isEnableSound) { PSound.setup(!isClearSound); }
+		//PTweenCompilerHint.unusedCode();
+		uiResetMouse();
 		uiStyle.init(this);
 	}
 	
@@ -64,12 +66,31 @@ public class uProcessing : PGraphics {
 
 	protected override void UpdateOneInput() {
 		base.UpdateOneInput();
+		uiPrevMouseX = uiMouseX;
+		uiPrevMouseY = uiMouseY;
 		if(uiIsPauseMouse) {
 			uiMousePressed = false;
 			uiMouseReleased = false;
 		} else {
+			#if UNITY_IOS || UNITY_ANDROID || UNITY_WP8
+			if(mousePressed) {
+				uiMouseX = mouseX;
+				uiMouseY = mouseY;
+				if(mouseButtonDown!=NONE) {
+					uiMouseDragX = uiMouseDragY = 0;
+				} else {
+					uiMouseDragX = uiMouseX - uiPrevMouseX;
+					uiMouseDragY = uiMouseY - uiPrevMouseY;
+				}
+			} else {
+				uiMouseDragX = uiMouseDragY = 0;
+			}
+			#else
 			uiMouseX = mouseX;
 			uiMouseY = mouseY;
+			uiMouseDragX = uiMouseX - uiPrevMouseX;
+			uiMouseDragY = uiMouseY - uiPrevMouseY;
+			#endif
 			uiMousePressed = mousePressed;
 			uiMouseReleased = mouseReleased;
 		}
@@ -135,29 +156,46 @@ public class uProcessing : PGraphics {
 	public static PTween tween<T>(T from, T to, float duration = 1.0f) {
 		return PTweener.tween(null, null, from, to, duration, PEase.Linear, null);
 	}
+	public static PTween wait(float duration = 1.0f) {
+		return PTweener.tween(null, null, 0.0f, 1.0f, duration, PEase.Linear, null);
+	}
 	public static void clearTweens() { PTweener.clear(); }
 	public static void removeTween(PTween t) { PTweener.remove(t); }
 	public static void removeOneTween(PTween t) { PTweener.removeOne(t); }
 
 	// Sound
+	public static void setSEVolume(float volume) { PSound.setSEVolume(volume); }
+	public static void setBGMVolume(float volume) { PSound.setBGMVolume(volume); }
 	public static void reserveSE(string resourceName, string name = null) { PSound.reserveSE(resourceName, name); }
 	public static void reserveBGM(string resourceName, string name = null) { PSound.reserveBGM(resourceName, name); }
-	public static void playSE(string name) { PSound.playSE(name); }
-	public static void playBGM(string name, bool isLoop = true) { PSound.playBGM(name); PSound.setLoopBGM(isLoop); }
+	public static void playSE(string name, float volume = 1.0f) { PSound.playSE(name, volume); }
+	public static void playBGM(string name, float volume = 1.0f, bool isLoop = true) { PSound.playBGM(name, volume, 0.25f); PSound.setLoopBGM(isLoop); }
 	public static void pauseBGM() { PSound.pauseBGM(); }
 	public static bool isPauseBGM() { return PSound.isPauseBGM(); }
+	public static bool isPlayingBGM() { return PSound.isPlayingBGM(); }
 	public static void resumeBGM() { PSound.playBGM(); }
-	public static void stopBGM() { PSound.stopBGM(); }
+	public static void stopBGM() { PSound.stopBGM(0.2f); }
 	public static void clearSE() { PSound.clearSE(); }
 	public static void clearBGM() { PSound.clearBGM(); }
 
 	// UI
+	public int uiPrevMouseX { get; private set; } 
+	public int uiPrevMouseY { get; private set; } 
 	public int uiMouseX { get; private set; } 
 	public int uiMouseY { get; private set; } 
+	public int uiMouseDragX { get; private set; } 
+	public int uiMouseDragY { get; private set; } 
 	public bool uiMousePressed { get; private set; } 
 	public bool uiMouseReleased { get; private set; } 
 	public void uiPauseMouse() { uiIsPauseMouse = true; }
 	public void uiNoPauseMouse() { uiIsPauseMouse = false; }
+	public void uiResetMouse() {
+		uiPrevMouseX = uiMouseX = -1;
+		uiPrevMouseY = uiMouseY = -1;
+		uiMouseDragX = uiMouseDragY = 0;
+		uiMousePressed = false;
+		uiMouseReleased = false;
+	}
 
 	public void layer2D(string layerName = "UI") {
 		// 3D camera
@@ -242,6 +280,45 @@ public class uProcessing : PGraphics {
 		return isActive && isClick;
 	}
 
+	public bool invisibleButton(float x, float y, float w, float h) {
+		PMatrix matrix = getMatrix();
+		matrix.invert();
+		Vector3 mv = matrix.mult(new Vector3(uiMouseX, uiMouseY));
+		
+		//bool isActive = (mouseX > x  && mouseX < x + w && mouseY > y && mouseY < y + h);
+		bool isActive = (mv.x > x  && mv.x < x + w && mv.y > y && mv.y < y + h);
+
+		bool isClick = uiClickUp ? uiMouseReleased : uiMousePressed;
+		if(isActive && isClick) {
+			buttonClick(uiStyle.groupName, name, null);
+		}
+		return isActive && isClick;
+	}
+
+	public bool invisibleDragArea(float x, float y, float w, float h, ref bool isDrag, out int dragX, out int dragY) {
+		PMatrix matrix = getMatrix();
+		matrix.invert();
+		Vector3 mv = matrix.mult(new Vector3(uiMouseX, uiMouseY));
+		
+		//bool isActive = (mouseX > x  && mouseX < x + w && mouseY > y && mouseY < y + h);
+		bool isActive = (mv.x > x  && mv.x < x + w && mv.y > y && mv.y < y + h);
+		
+		if((isActive || isDrag) && (uiMousePressed || uiMouseReleased)) {
+			dragX = uiMouseDragX;
+			dragY = uiMouseDragY;
+			int margin = 2;
+			if(!isDrag && abs(dragX)<=margin && abs(dragY)<=margin) {
+				isDrag = false;
+			} else {
+				isDrag = true;
+			}
+		} else {
+			dragX = dragY = 0;
+			isDrag = false;
+		}
+		return isDrag;
+	}
+	
 	public void label(string name, float x, float y, float w, float h, int textSize = 0) {
 		pushStyle();
 		string objName = "label: " + name;
@@ -287,8 +364,11 @@ public class uProcessing : PGraphics {
 		if(uiStyle.normal.frameWeight > 0) {
 			stroke(uiStyle.normal.frameColor);
 			strokeWeight(uiStyle.normal.frameWeight);
-		} else { noStroke(); }
-		fill(uiStyle.normal.bgColor);
+			fill(uiStyle.normal.bgColor);
+		} else {
+			noStroke();
+			fill(uiStyle.normal.frameColor);
+		}
 		rect(x, y, w, h);
 
 		// Message

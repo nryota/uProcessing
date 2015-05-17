@@ -181,7 +181,7 @@ public class PTween<T> : PTween where T : struct {
 
 	public PTween play(T start, T end, float duration, PTweenEaseFunc easeFunc, PTweenOnComplete onComplete=null, float delay=0.0f) {
 		if(duration <= 0 || easeFunc == null) {
-			Debug.LogError("Tween Error: Invalid Param");
+			Debug.LogError("PTween play: Invalid Param");
 			return null;
         }
 
@@ -502,6 +502,8 @@ public class PTweenHelper {
 		}
 
 		objValue = defaultValue;
+
+		Debug.LogWarning("PTween getValue : Not found target : " + obj + " / " + name);
 		return false;
 	}
 
@@ -528,7 +530,8 @@ public class PTweenHelper {
 			setMethod.Invoke(obj, new object[1] {value});
 			return true;
 		}
-		
+
+		Debug.LogWarning("PTween setValue : Not found target : " + obj + " / " + name);
 		return false;
 	}
 }
@@ -737,40 +740,24 @@ public class PTweener {
 
 		if (args.isExist ("from") && args.isExist ("to")) {
 			if (args.isType<int>("from")) {
-				rtw = play<int>(args, duration, easeFunc, onComplete, delay);
+				rtw = play<int>(obj, args, duration, easeFunc, onComplete, delay);
 			} else if (args.isType<float>("from")) {
-				rtw = play<float>(args, duration, easeFunc, onComplete, delay);
+				rtw = play<float>(obj, args, duration, easeFunc, onComplete, delay);
 			} else if (args.isType<Vector2>("from")) {
-				rtw = play<Vector2>(args, duration, easeFunc, onComplete, delay);
+				rtw = play<Vector2>(obj, args, duration, easeFunc, onComplete, delay);
 			} else if (args.isType<Vector3>("from")) {
-				rtw = play<Vector3>(args, duration, easeFunc, onComplete, delay);
+				rtw = play<Vector3>(obj, args, duration, easeFunc, onComplete, delay);
 			} else if (args.isType<Vector4>("from")) {
-				rtw = play<Vector4>(args, duration, easeFunc, onComplete, delay);
+				rtw = play<Vector4>(obj, args, duration, easeFunc, onComplete, delay);
 			} else if (args.isType<Color>("from")) {
-				rtw = play<Color>(args, duration, easeFunc, onComplete, delay);
+				rtw = play<Color>(obj, args, duration, easeFunc, onComplete, delay);
 			} else if (args.isType<Quaternion>("from")) {
-				rtw = play<Quaternion>(args, duration, easeFunc, onComplete, delay);
+				rtw = play<Quaternion>(obj, args, duration, easeFunc, onComplete, delay);
 			} else {
-				Debug.LogError("tween: invalid type:" + args.getType("from"));
+				Debug.LogError("PTween: invalid type:" + args.getType("from"));
 				return null;
 			}
 		}
-
-		if(rtw!=null) {
-			bool isLoop = args.getValue<bool> ("isLoop",  false);
-			rtw.isLoop = isLoop;
-		}
-
-		if (obj != null) {
-			string valueName = args.getValue<string> ("target", null);
-			if (valueName != null) {
-				rtw.setTarget(obj, valueName);
-			}
-			/*if(onComplete!=null) {
-				rtw.AddOnComplete(onComplete);
-			}*/
-		}
-
 		return rtw;
 	}
 
@@ -804,14 +791,25 @@ public class PTweener {
 		else if (t==typeof(Vector4)) { tween = new Vector4Tween(); }
 		else if (t==typeof(Color)) { tween = new ColorTween(); }
 		else if (t==typeof(Quaternion)) { tween = new QuaternionTween(); }
-		else { Debug.LogError("createTween: invalid type: " + t); return null; }
+		else { Debug.LogError("PTween createTween: invalid type: " + t); return null; }
 		add(tween);
 		return tween;
 	}
 	
-	private static PTween play<T>(PTweenArgs args, float duration, PTweenEaseFunc easeFunc, PTweenOnComplete onComplete, float delay) where T : struct {
+	private static PTween play<T>(object obj, PTweenArgs args, float duration, PTweenEaseFunc easeFunc, PTweenOnComplete onComplete, float delay) where T : struct {
 		var tw = createTween<T>() as PTween<T>;
 		if(tw!=null) {
+			tw.isLoop = args.getValue<bool> ("isLoop",  false);
+
+			if (obj != null) {
+				string valueName = args.getValue<string> ("target", null);
+				if (valueName != null) {
+					tw.setTarget(obj, valueName);
+				}
+				/*if(onComplete!=null) {
+				tw.AddOnComplete(onComplete);
+				}*/
+			}
 			tw.play(args.getValue<T>("from"), args.getValue<T>("to"), duration, easeFunc, onComplete, delay);
 		}
 		return tw;
@@ -901,5 +899,75 @@ public class PTweener {
 				return defaultValue;
 			}
 		}
+	}
+}
+
+public class PTweenCompilerHint {
+	// for iOS (ExecutionEngineException: Attempting to JIT compile method * while running with –aot-only.)
+	static public void unusedCode() {
+		PTween<int> ti = PTweener.tween<int>(null, "hint", default(int), default(int), 1.0f, PEase.Linear) as PTween<int>;
+		PTween<float> tf = PTweener.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear) as PTween<float>;
+		PTween<Color> tc = PTweener.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear) as PTween<Color>;
+		PTween<Vector2> tv2 = PTweener.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear) as PTween<Vector2>;
+		PTween<Vector3> tv3 = PTweener.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear) as PTween<Vector3>;
+		PTween<Vector4> tv4 = PTweener.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear) as PTween<Vector4>;
+		PTween<Quaternion> tq = PTweener.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear) as PTween<Quaternion>;
+		
+		ti.tween<int>(null, "hint", default(int), default(int), 1.0f, PEase.Linear);
+		ti.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear);
+		ti.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear);
+		ti.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear);
+		ti.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear);
+		ti.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear);
+		ti.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear);
+		
+		tf.tween<int>(null, "hint", default(int), default(int), 1.0f, PEase.Linear);
+		tf.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear);
+		tf.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear);
+		tf.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear);
+		tf.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear);
+		tf.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear);
+		tf.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear);
+		
+		tc.tween<int>(null, "hint", default(int), default(int), 1.0f, PEase.Linear);
+		tc.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear);
+		tc.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear);
+		tc.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear);
+		tc.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear);
+		tc.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear);
+		tc.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear);
+		
+		tv2.tween<int>(null, "hint", default(int), default(int), 1.0f, PEase.Linear);
+		tv2.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear);
+		tv2.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear);
+		tv2.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear);
+		tv2.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear);
+		tv2.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear);
+		tv2.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear);
+		
+		tv3.tween<int>(null, "hint", default(int), default(int), 1.0f, PEase.Linear);
+		tv3.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear);
+		tv3.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear);
+		tv3.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear);
+		tv3.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear);
+		tv3.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear);
+		tv3.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear);
+		
+		tv4.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear);
+		tv4.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear);
+		tv4.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear);
+		tv4.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear);
+		tv4.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear);
+		tv4.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear);
+		
+		tq.tween<int>(null, "hint", default(int), default(int), 1.0f, PEase.Linear);
+		tq.tween<float>(null, "hint", default(float), default(float), 1.0f, PEase.Linear);
+		tq.tween<Color>(null, "hint", default(Color), default(Color), 1.0f, PEase.Linear);
+		tq.tween<Vector2>(null, "hint", default(Vector2), default(Vector2), 1.0f, PEase.Linear);
+		tq.tween<Vector3>(null, "hint", default(Vector3), default(Vector3), 1.0f, PEase.Linear);
+		tq.tween<Vector4>(null, "hint", default(Vector4), default(Vector4), 1.0f, PEase.Linear);
+		tq.tween<Quaternion>(null, "hint", Quaternion.identity, Quaternion.identity, 1.0f, PEase.Linear);
+		
+		PTweener.clear();
 	}
 }

@@ -10,6 +10,7 @@ public class PImage : MonoBehaviour {
 	public Texture2D texture;
 	public int width = 0, height = 0;
 	public int abc = 0;
+	public string path;
 
 	#region Processing Members
 	public Color get(int x, int y) {
@@ -28,6 +29,7 @@ public class PImage : MonoBehaviour {
 
 	#region Processing Extra Members
 	public void load(string path) {
+		this.path = path;
 		if(path.StartsWith("http://") || path.StartsWith("file://")) {
 			StartCoroutine("loadFromURL", path);
 			graphics.debuglog("loadImage:loadFromURL " + path);

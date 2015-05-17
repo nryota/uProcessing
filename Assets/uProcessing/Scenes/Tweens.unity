@@ -73,6 +73,7 @@ NavMeshSettings:
     minRegionArea: 2
     widthInaccuracy: 16.666666
     heightInaccuracy: 10
+    tileSizeHint: 0
   m_NavMesh: {fileID: 0}
 --- !u!1 &761136423
 GameObject:
@@ -120,7 +121,7 @@ MonoBehaviour:
   sceneScale: .00999999978
   depthStep: .0500000007
   isEnableDepthStep: 1
-  isEnableFixedUpdate: 0
+  isEnableFixedUpdate: 1
   basicPrefabs:
     line: {fileID: 0}
     rect: {fileID: 0}
@@ -128,3 +129,5 @@ MonoBehaviour:
     box: {fileID: 0}
     sphere: {fileID: 0}
     text: {fileID: 0}
+  isEnableSound: 1
+  isClearSound: 1

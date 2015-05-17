@@ -90,7 +90,8 @@ PGameObjectはMonoBehaviourを継承したコンポーネントなので、obj.g
 #### GameObjectのリサイクル
 box()やrect()などもすべて個別のGameObjectとなっています。毎回消して生成するのが無駄だと感じる場合は、recycle()という関数を呼ぶことで、それ以降同じ順番で呼ばれたGameObjectを消さずに使いまわすようになります。
 ただし、完全に呼び出し順依存なので、途中に一時的なGameObjectを生成する場合はnoRecycle()を直前に呼んで、GameObjectを使いまわさないようにしてください。
-（beginRecycle()〜endRecycle()やbeginNoRecycle()〜endRecycle()も使えます）
+
+beginRecycle()〜endRecycle()やbeginNoRecycle()〜endRecycle()も使えます。なお、beginRecycle(番号)〜endRecycle()で囲ったものはその番号のグループとしてIDが割り振られ、clearRecycle(番号)で破棄できます。
 
 #### GameObjectのキープ
 recycle()の場合、GameObjectは消さずに使いまわすとはいえ、毎回draw()内で描画指示する必要があります。もっとUnity的に一度生成したら放っておいてもオブジェクトが描画されるような形で使いたい場合、keep()、noKeep()またはbeginKeep()〜endKeep()を使うと実現できます。

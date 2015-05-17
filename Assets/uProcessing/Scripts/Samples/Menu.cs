@@ -19,7 +19,7 @@ public class Menu : uProcessing {
 		float h = height / 3 - s * 2;
 		int ts = 15;
 
-		if(button("Hello World", color(0, 255, 0), x, y, w, h, ts)) {
+		if(button("Hello World", color(0, 200, 0), x, y, w, h, ts)) {
 			loadScene("HelloWorld");
 		}
 		

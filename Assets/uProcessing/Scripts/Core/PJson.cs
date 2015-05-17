@@ -70,12 +70,12 @@ public class JSONArray {
 	}
 
 	protected void onLoadComplete(string json) {
-		list = MiniJSON.Json.Deserialize(json) as List<object>;
+		list = PMiniJSON.Json.Deserialize(json) as List<object>;
 	}
 	
 	public bool save(PGraphics graphics, string path) {
 		if(list==null) return false;
-		string text = MiniJSON.Json.Serialize(list);
+		string text = PMiniJSON.Json.Serialize(list);
 		if(text==null) return false;
 		graphics.saveStringText(path, text);
 		return true;
@@ -165,14 +165,14 @@ public class JSONObject {
 
 	public bool save(PGraphics graphics, string path) {
 		if(data==null) return false;
-		string text = MiniJSON.Json.Serialize(data);
+		string text = PMiniJSON.Json.Serialize(data);
 		if(text==null) return false;
 		graphics.saveStringText(path, text);
 		return true;
 	}
 
 	protected void onLoadComplete(string json) {
-		data = MiniJSON.Json.Deserialize(json) as Dictionary<string, object>;
+		data = PMiniJSON.Json.Deserialize(json) as Dictionary<string, object>;
 	}
 
 	public bool isComplete { get { return data!=null; } }

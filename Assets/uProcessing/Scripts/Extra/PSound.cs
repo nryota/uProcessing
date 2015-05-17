@@ -18,9 +18,12 @@ class PSound // : MonoBehaviour
 		setup();
 	}
 
-	public static void setup() {
+	public static void setup(bool dontDestroyOnLoad = false) {
 		if(!psoundObj) {
 			psoundObj = new GameObject("PSound");
+		}
+		if(dontDestroyOnLoad) {
+			UnityEngine.Object.DontDestroyOnLoad(psoundObj);
 		}
 		if(soundPlayer==null) {
 			soundPlayer = new PSoundPlayer();
@@ -43,6 +46,7 @@ class PSound // : MonoBehaviour
 			}
 			if(psoundObj!=null) {
 				GameObject.Destroy(psoundObj);
+				psoundObj = null;
 			}
 			instance = null;
 		}
@@ -54,6 +58,16 @@ class PSound // : MonoBehaviour
 		}
 	}
 
+	public static void setSEVolume(float scale) {
+		ready();
+		soundPlayer.setSEVolume(scale);
+	}
+
+	public static void setBGMVolume(float scale) {
+		ready();
+		soundPlayer.setBGMVolume(scale);
+	}
+	
 	public static void reserveSE(string resourceName, string name = null) {
 		ready();
 		soundPlayer.reserveSE(resourceName, name);
@@ -64,14 +78,14 @@ class PSound // : MonoBehaviour
 		soundPlayer.reserveBGM(resourceName, name);
 	}
 	
-	public static void playSE(string name) {
+	public static void playSE(string name, float volume = 1.0f) {
 		ready();
-		soundPlayer.playSE(name);
+		soundPlayer.playSE(name, volume);
 	}
 
-	public static void playBGM(string name, float fadeTime = 0.0f) {
+	public static void playBGM(string name, float volume = 1.0f, float fadeTime = 0.0f) {
 		ready();
-		soundPlayer.playBGM(name, fadeTime);
+		soundPlayer.playBGM(name, volume, fadeTime);
 	}
 
 	public static void playBGM() {
@@ -92,6 +106,11 @@ class PSound // : MonoBehaviour
 	public static bool isPauseBGM() {
 		ready();
 		return soundPlayer.isPauseBGM();
+	}
+
+	public static bool isPlayingBGM() {
+		ready();
+		return soundPlayer.isPlayingBGM();
 	}
 
 	public static void stopBGM(float fadeTime = 0.0f) {
@@ -123,7 +142,10 @@ class PSound // : MonoBehaviour
 
 		PBGMPlayer curBGMPlayer;
 		PBGMPlayer fadeOutBGMPlayer;
-		
+
+		float bgmVolume = 1.0f;
+		float seVolume = 1.0f;
+
 		// AudioClip information
 		class AudioClipInfo {
 			public string resourceName;
@@ -137,6 +159,17 @@ class PSound // : MonoBehaviour
 		}
 		
 		public PSoundPlayer() {}
+
+		public void setSEVolume(float scale) {
+			seVolume = scale;
+		}
+
+		public void setBGMVolume(float scale) {
+			bgmVolume = scale;
+			if (curBGMPlayer != null) {
+				curBGMPlayer.volume = scale;
+			}
+		}
 
 		public void clear() {
 			clearSE();
@@ -182,7 +215,7 @@ class PSound // : MonoBehaviour
 			bgmClips.Add(name, new AudioClipInfo(resourceName, name) );
 		}
 
-		public bool playSE( string seName ) {
+		public bool playSE( string seName, float volume = 1.0f ) {
 			if (seClips.ContainsKey (seName) == false) {
 				reserveSE(seName);
 				//return false; // not register
@@ -201,12 +234,12 @@ class PSound // : MonoBehaviour
 			}
 			
 			// Play SE
-			audioSource.PlayOneShot( info.clip );
+			audioSource.PlayOneShot( info.clip, volume * seVolume );
 			
 			return true;
 		}
 
-		public void playBGM( string bgmName, float fadeTime ) {
+		public void playBGM( string bgmName, float volume = 1.0f, float fadeTime = 0.0f ) {
 			// destory old BGM
 			if ( fadeOutBGMPlayer != null )
 				fadeOutBGMPlayer.destory();
@@ -226,6 +259,8 @@ class PSound // : MonoBehaviour
 			}
 
 			curBGMPlayer = new PBGMPlayer( bgmClips[ bgmName ].resourceName );
+			curBGMPlayer.localVolume = volume;
+			curBGMPlayer.volume = bgmVolume;
 			curBGMPlayer.playBGM( fadeTime );
 		}
 
@@ -252,10 +287,15 @@ class PSound // : MonoBehaviour
 			if ( fadeOutBGMPlayer != null )
 				fadeOutBGMPlayer.pauseBGM();
 		}
+
 		public bool isPauseBGM() {
 			return curBGMPlayer!=null ? curBGMPlayer.isPause() : false;
 		}
 
+		public bool isPlayingBGM() {
+			return curBGMPlayer!=null ? curBGMPlayer.isPlaying() : false;
+		}
+		
 		public void stopBGM( float fadeTime ) {
 			if ( curBGMPlayer != null )
 				curBGMPlayer.stopBGM( fadeTime );
@@ -311,9 +351,9 @@ class PSound // : MonoBehaviour
 			
 			public override void update() {
 				t += Time.deltaTime;
-				bgmPlayer.source.volume = t / bgmPlayer.fadeInTime;
+				bgmPlayer.source.volume = t / bgmPlayer.fadeInTime * bgmPlayer.baseVolume;
 				if ( t >= bgmPlayer.fadeInTime ) {
-					bgmPlayer.source.volume = 1.0f;
+					bgmPlayer.source.volume = bgmPlayer.baseVolume;
 					bgmPlayer.state = new Playing( bgmPlayer );
 				}
 			}
@@ -322,7 +362,7 @@ class PSound // : MonoBehaviour
 		class Playing : State {
 			public Playing( PBGMPlayer bgmPlayer ) : base( bgmPlayer ) {
 				if ( bgmPlayer.source.isPlaying == false ) {
-					bgmPlayer.source.volume = 1.0f;
+					bgmPlayer.source.volume = bgmPlayer.baseVolume;
 					bgmPlayer.source.Play();
 				}
 			}
@@ -386,7 +426,12 @@ class PSound // : MonoBehaviour
 		float fadeInTime = 0.0f;
 		float fadeOutTime = 0.0f;
 		bool isFinishFadeOut = false;
-		
+		float baseVolume = 1.0f;
+		public float localVolume = 1.0f;
+		public float volume { 
+			get { return source!=null ? source.volume : baseVolume; }
+			set { baseVolume = localVolume * value; if(source!=null) source.volume = baseVolume; } }
+
 		public PBGMPlayer() {}
 		
 		public PBGMPlayer( string bgmFileName ) {
@@ -437,13 +482,21 @@ class PSound // : MonoBehaviour
 			return state is Pause;
 		}
 		
+		public bool isPlaying() {
+			if (source != null) {
+				return source.isPlaying;//state is Playing;
+			} else {
+				return false;
+			}
+		}
+
 		public void stopBGM( float fadeTime ) {
 			if ( source != null ) {
 				fadeOutTime = fadeTime;
 				state.stopBGM();
 			}
 		}
-		
+
 		public void update() {
 			if ( source != null ) {
 				state.update();

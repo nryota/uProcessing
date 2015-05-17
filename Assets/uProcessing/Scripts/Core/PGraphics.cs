@@ -17,7 +17,7 @@ public class PGraphics : MonoBehaviour {
 	[SerializeField] private float sceneScale = 0.01f;
 	[SerializeField] private float depthStep = 0.05f;
 	[SerializeField] private bool isEnableDepthStep = true;
-	[SerializeField] private bool isEnableFixedUpdate = false;
+	[SerializeField] private bool isEnableFixedUpdate = true;
 	#endregion
 
 	#region Primitives
@@ -51,6 +51,7 @@ public class PGraphics : MonoBehaviour {
 	private const uint PrimitiveGroupMult = 0x10000;
 	private const uint PrimitiveGroupSetup = 0x80000000;
 	private int _fixedUpdateCount = 0;
+	private int _fixedUpdateNo = 0;
 
 	public struct PStyle {
 		public Color backgroundColor;
@@ -169,6 +170,7 @@ public class PGraphics : MonoBehaviour {
 		oneKeyCode = NONE;
 		workDepth = 0.0f;
 		_fixedUpdateCount = 0;
+		_fixedUpdateNo = 0;
 		LoadPrimitives();
 		workPrimitiveKey = PrimitiveGroupSetup;
 		InitMatrix();
@@ -208,17 +210,21 @@ public class PGraphics : MonoBehaviour {
 	protected virtual void PreSetup() {}
 
 	protected virtual void Update() {
+		_fixedUpdateNo = 0;
 		UpdateOneKey();
 		if(isEnableFixedUpdate) {
 			for(int i=0; i<_fixedUpdateCount || i<1; i++) {
-				if(i>0) { PreDraw(); }
+				_fixedUpdateNo = i;
+				if(_fixedUpdateNo>0) { PreDraw(); }
 				UpdateOneLoop();
 			}
 		} else {
+			_fixedUpdateNo = 0;
 			UpdateOneLoop();
 		}
 		if(_fixedUpdateCount<=0) _fixedUpdateCount--;
 		else _fixedUpdateCount = 0;
+		_fixedUpdateNo = 0;
 		UpdateOneInput();
 	}
 
@@ -1329,7 +1335,11 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	public PImage loadImage(string path, int width = 0, int height = 0) {
-		PImage img = system.work.gameObject.AddComponent<PImage>();
+		return loadImage(system.work.gameObject, path, width, height);
+	}
+	
+	public PImage loadImage(GameObject obj, string path, int width = 0, int height = 0) {
+		PImage img = obj.AddComponent<PImage>();
 		img.graphics = this;
 		img.width = width;
 		img.height = height;
@@ -1578,8 +1588,9 @@ public class PGraphics : MonoBehaviour {
 
 	public bool mouseReleased { get { return mouseButtonUp != NONE; } }
 	public int mouseButtonUp {
-		get { 
-			if(Input.GetMouseButtonUp(0)) return LEFT;
+		get {
+			if(_fixedUpdateNo>0) { return NONE; }
+			else if(Input.GetMouseButtonUp(0)) return LEFT;
 			else if(Input.GetMouseButtonUp(1)) return RIGHT;
 			else if(Input.GetMouseButtonUp(2)) return MIDDLE;
 			else return NONE;
@@ -1587,7 +1598,8 @@ public class PGraphics : MonoBehaviour {
 	}
 	public int mouseButtonDown {
 		get { 
-			if(Input.GetMouseButtonDown(0)) return LEFT;
+			if(_fixedUpdateNo>0) { return NONE; }
+			else if(Input.GetMouseButtonDown(0)) return LEFT;
 			else if(Input.GetMouseButtonDown(1)) return RIGHT;
 			else if(Input.GetMouseButtonDown(2)) return MIDDLE;
 			else return NONE;
@@ -1595,11 +1607,11 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	public bool isKey(KeyCode keyCode) { return Input.GetKey(keyCode); }
-	public bool isKeyDown(KeyCode keyCode) { return Input.GetKeyDown(keyCode); }
-	public bool isKeyUp(KeyCode keyCode) { return Input.GetKeyUp(keyCode); }
+	public bool isKeyDown(KeyCode keyCode) { return _fixedUpdateNo>0 ? false : Input.GetKeyDown(keyCode); }
+	public bool isKeyUp(KeyCode keyCode) { return _fixedUpdateNo>0 ? false : Input.GetKeyUp(keyCode); }
 	public bool isKey(string keyName) { return Input.GetKey(keyName); }
-	public bool isKeyDown(string keyName) { return Input.GetKeyDown(keyName); }
-	public bool isKeyUp(string keyName) { return Input.GetKeyUp(keyName); }
+	public bool isKeyDown(string keyName) { return _fixedUpdateNo>0 ? false : Input.GetKeyDown(keyName); }
+	public bool isKeyUp(string keyName) { return _fixedUpdateNo>0 ? false : Input.GetKeyUp(keyName); }
 
 	public float inputAxis(string name) { return Input.GetAxis(name); }
 	public float inputX { get { return Input.GetAxis("Horizontal"); } }
@@ -1647,9 +1659,33 @@ public class PGraphics : MonoBehaviour {
 		}
 	}
 
+	public void clearRecycle(short id = 0) {
+		List<uint> removeKeys = new List<uint>();
+		foreach(KeyValuePair<uint, GameObject> pair in recyclePrimitives) {
+			if(!pair.Value) continue;
+			if(id > 0) {
+				PGameObject pobj = pair.Value.GetComponent<PGameObject>();
+				if(pobj!=null) {
+					if( pobj.primitiveKey / PrimitiveGroupMult != id ) {
+						continue;
+					}
+					removeKeys.Add(pair.Key);
+				}
+			}
+			Destroy(pair.Value);
+		}
+		if (id > 0) {
+			foreach(uint key in removeKeys) {
+				recyclePrimitives.Remove(key);
+			}
+		} else {
+			recyclePrimitives.Clear ();
+		}
+	}
+
 	public void clearAll() {
 		clear();
-		recyclePrimitives.Clear();
+		clearRecycle();
 	}
 
 	public void fill(Color c) { fill((int)(c.r*255), (int)(c.g*255), (int)(c.b*255), (int)(c.a*255)); }
@@ -1690,26 +1726,61 @@ public class PGraphics : MonoBehaviour {
 		noKeep();
 	}
 
-	public T prefab<T>(string path, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) where T : MonoBehaviour {
-		PGameObject pobj = prefab(path, x, y, z, sx, sy, sz);
-		if(!pobj) return null;
-		T comp = pobj.GetComponent<T>();
-		if(!comp) { comp = pobj.gameObject.AddComponent<T>(); }
+	public T prefab<T>(GameObject prefabObj, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) where T : MonoBehaviour {
+		if(!prefabObj) {
+			debuglogWaring("prefab <Null Resource>");
+			return null;
+		}
+		PGameObject obj = GetPrimitive();
+		T comp;
+		if(!obj) {
+			GameObject gameObj = Instantiate(prefabObj) as GameObject;
+			if(!gameObj) {
+				debuglogWaring("prefab <Instantiate Failed>");
+				return null;
+			}
+			comp = gameObj.GetComponent<T>();
+			if(!comp) { comp = gameObj.AddComponent<T>(); }
+			obj = AddPrimitive(gameObj);
+		} else {
+			comp = obj.GetComponent<T>();
+		}
+		SetProperty(obj, new Vector3(x, y, z), toP5(sx, sy, sz));
 		return comp;
 	}
 
-	public PGameObject prefab(string path, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) {
+	public PGameObject prefab(GameObject prefabObj, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) {
+		return prefab<PGameObject>(prefabObj, x, y, z, sx, sy, sz);
+	}
+
+	public T prefab<T>(string path, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) where T : MonoBehaviour {
 		PGameObject obj = GetPrimitive();
 		if(!obj) {
-			GameObject prefab = Resources.Load(path) as GameObject;
-			if(!prefab) {
+			GameObject prefabObj = Resources.Load(path) as GameObject;
+			if(!prefabObj) {
 				debuglogWaring("prefab <NotFound> " + path);
 				return null;
 			}
-			obj = AddPrimitive(Instantiate(prefab) as GameObject);
+			return prefab<T>(prefabObj, x, y, z, sx, sy, sz);
+		} else {
+			SetProperty(obj, new Vector3(x, y, z), toP5(sx, sy, sz));
+			return obj.GetComponent<T>();
+		}
+	}
+
+	public PGameObject prefab(string path, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) {
+		return prefab<PGameObject>(path, x, y, z, sx, sy, sz);
+	}
+
+	public T pobject<T>(string name, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) where T : MonoBehaviour {
+		PGameObject obj = GetPrimitive();
+		if(!obj) {
+			GameObject gameObj = new GameObject(name);
+			gameObj.AddComponent<T>();
+			obj = AddPrimitive(gameObj);
 		}
 		SetProperty(obj, new Vector3(x, y, z), toP5(sx, sy, sz));
-		return obj;
+		return obj.GetComponent<T>();
 	}
 
 	public PGameObject pobject(string name, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) {

@@ -116,7 +116,10 @@ public class PGameObject : MonoBehaviour {
 		get { return transform.localRotation; }
 		set { transform.localRotation = value; }
 	}
-
+	public Vector3 localScale {
+		get { return transform.localScale; }
+		set { transform.localScale = value; }
+	}
 	public Color color {
 		get { return _color; }
 		set {
