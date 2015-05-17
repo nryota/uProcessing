@@ -15,20 +15,32 @@ public class PWireframe : MonoBehaviour {
 
 	private Vector3[] strokes;
 	public Material strokeMaterial;
+	public Material _strokeMaterial;
 
 	void Awake() {
 		if (strokeMaterial == null) {
 			strokeMaterial = new Material ("Shader \"Custom/wireframeShader\" {" +
 			                        	   "SubShader { " + 
 			                               "Tags { \"Queue\"=\"Transparent\" \"RenderType\"=\"Transparent\" }" +
+			                               "BindChannels { Bind \"Color\", color }" +
 			                               "Pass {" +
-			                           	   "   BindChannels { Bind \"Color\",color }" +
 			                               "   Blend SrcAlpha OneMinusSrcAlpha" +
-			                               "   ZWrite On ZTest Less Cull Off Fog { Mode Off }" +
+			                               "   Color[_Color] Lighting Off ZWrite On ZTest Less Cull Off Fog { Mode Off }" +
 			                               "} } }");
 			strokeMaterial.hideFlags = HideFlags.HideAndDontSave;
 			strokeMaterial.shader.hideFlags = HideFlags.HideAndDontSave;
 		}
+		_strokeMaterial = new Material ("Shader \"Custom/wireframeShader\" {" +
+		                               "SubShader { " + 
+		                               "Tags { \"Queue\"=\"Transparent\" \"RenderType\"=\"Transparent\" }" +
+		                               "BindChannels { Bind \"Color\", color }" +
+		                               "Pass {" +
+		                               "   Blend SrcAlpha OneMinusSrcAlpha" +
+		                               "   Color[_Color] Lighting Off ZWrite On ZTest Less Cull Off Fog { Mode Off }" +
+		                               "} } }");
+		//_strokeMaterial = new Material(
+		//	"Shader \"Lines/Background\" { Properties { _Color (\"Main Color\", Color) = ("+strokeColor.r+","+strokeColor.g+","+strokeColor.b+","+strokeColor.a+") } SubShader { Pass { ZWrite on Blend SrcAlpha OneMinusSrcAlpha Colormask RGBA Lighting Off Offset 1, 1 Color[_Color] }}}"
+		//	);
 
 		MeshFilter filter  = gameObject.GetComponent<MeshFilter>();
 		if(filter) {
@@ -87,11 +99,12 @@ public class PWireframe : MonoBehaviour {
 		if(!Camera.main || strokes == null || strokes.Length <= 0 || strokeWeight <= 0 || !isStroke) return;
 
 		Transform tr = gameObject.transform;
+		strokeMaterial.color = strokeColor;
 		strokeMaterial.SetPass(0);
 
 		if(strokeWeight == 1) {
 			GL.Begin(GL.LINES);
-			GL.Color(strokeColor);
+			//GL.Color(strokeColor);
 			for(int i = 0; i+2 < strokes.Length; i+=3)
 			{
 				Vector3 vec1 = tr.TransformPoint(strokes[i]);
@@ -112,7 +125,7 @@ public class PWireframe : MonoBehaviour {
 			}
 		} else {
 			GL.Begin(GL.QUADS);
-			GL.Color(strokeColor);
+			//GL.Color(strokeColor);
 			for(int i = 0; i+2 < strokes.Length; i+=3) {
 				Vector3 vec1 = tr.TransformPoint(strokes[i]);
 				Vector3 vec2 = tr.TransformPoint(strokes[i + 1]);

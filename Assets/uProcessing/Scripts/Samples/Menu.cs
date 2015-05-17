@@ -5,6 +5,7 @@ public class Menu : uProcessing {
 
 	protected override void setup() {
 		size(200 * displayAspectW, 200, P2D);
+		frameRate(60);
 		recycle();
 	}
 	

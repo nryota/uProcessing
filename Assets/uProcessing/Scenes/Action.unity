@@ -73,6 +73,7 @@ NavMeshSettings:
     minRegionArea: 2
     widthInaccuracy: 16.666666
     heightInaccuracy: 10
+    tileSizeHint: 0
   m_NavMesh: {fileID: 0}
 --- !u!1 &761136423
 GameObject:
@@ -101,6 +102,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 0
 --- !u!114 &761136426
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,9 +115,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isAutoFit: 1
-  isSetDefaultLight: 1
+  isCenter: 1
+  isSetDefaultLight: 0
+  isEnableMaterialPB: 1
   sceneScale: .00999999978
   depthStep: .0500000007
+  isEnableDepthStep: 1
+  isEnableFixedUpdate: 1
   basicPrefabs:
     line: {fileID: 0}
     rect: {fileID: 0}
@@ -123,13 +129,14 @@ MonoBehaviour:
     box: {fileID: 0}
     sphere: {fileID: 0}
     text: {fileID: 0}
+  isEnableSound: 1
+  isClearSound: 1
   unityChan:
     forwardSpeed: 3
     backwardSpeed: 1
     jumpPower: 5
     slidePower: 20
     obj: {fileID: 0}
-  LAYER_2D: 7
 --- !u!1 &1840334519
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,9 +173,8 @@ Renderer:
   m_UseLightProbes: 0
   m_LightProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
-  m_SortingLayer: 0
-  m_SortingOrder: 0
   m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!64 &1840334521
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -200,3 +206,4 @@ Transform:
   m_LocalScale: {x: 100, y: 1, z: 20}
   m_Children: []
   m_Father: {fileID: 0}
+  m_RootOrder: 1

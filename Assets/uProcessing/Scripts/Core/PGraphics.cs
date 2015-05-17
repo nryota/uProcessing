@@ -649,6 +649,7 @@ public class PGraphics : MonoBehaviour {
 	public int displayWidth { get { return Screen.width; } }
 	public int displayHeight { get { return Screen.height; } }
 	public int frameCount { get { return Time.frameCount; } }
+	public void frameRate(int fps) { Application.targetFrameRate = fps; }
 	public int day() { return DateTime.Now.Day; }
 	public int hour() { return DateTime.Now.Hour; }
 	public int millis() { return (int)((DateTime.Now.Ticks - startTicks) / 10000 ); }

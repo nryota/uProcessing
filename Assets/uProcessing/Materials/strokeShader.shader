@@ -5,14 +5,10 @@
 
     SubShader {
 		Tags {"Queue"="Transparent" "RenderType"="Transparent" }
+		BindChannels { Bind "Color", color }
         Pass {
 	        Blend SrcAlpha OneMinusSrcAlpha
-	        Color[_Color]
-            Lighting Off
-            ZWrite On
-            ZTest Less
-            Cull Off
-            Fog { Mode Off }
+	        Color[_Color] Lighting Off ZWrite On ZTest Less Cull Off Fog { Mode Off }
         }
     }
     
