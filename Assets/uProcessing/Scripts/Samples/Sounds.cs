@@ -45,6 +45,6 @@ public class Sounds : uProcessing {
 	}
 
 	protected override void onKeyTyped() {
-		if(key == ESC) { loadScene("ListView"); }
-	}
+        if(key == ESC || key == 'q') { loadScene("ListView"); }
+    }
 }

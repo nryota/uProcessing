@@ -18,10 +18,11 @@ public class PGraphics : MonoBehaviour {
 	[SerializeField] private float depthStep = 0.05f;
 	[SerializeField] private bool isEnableDepthStep = true;
 	[SerializeField] private bool isEnableFixedUpdate = true;
-	#endregion
+    [SerializeField] private bool isEnableAutoAmbient = true;
+    #endregion
 
-	#region Primitives
-	[System.SerializableAttribute]
+    #region Primitives
+    [System.SerializableAttribute]
 	class BasicPrefabs {
 		public GameObject line = null;
 		public GameObject rect = null;
@@ -33,6 +34,17 @@ public class PGraphics : MonoBehaviour {
 	[SerializeField] private BasicPrefabs basicPrefabs = new BasicPrefabs();
 	#endregion
 
+	#region Materials
+	class OptionMaterials {
+		public Material fillLightOff = null;
+		public Material fillZTestOff = null;
+		public Material strokeZTestOff = null;
+		public Material fillZWriteOff = null;
+		public Material strokeZWriteOff = null;
+	}
+	private OptionMaterials optionMaterials = new OptionMaterials();
+	#endregion
+
 	#region Variables
 	private Dictionary<uint, GameObject> recyclePrimitives = new Dictionary<uint, GameObject>();
 	private List<GameObject> tempPrimitives = new List<GameObject>();
@@ -42,6 +54,8 @@ public class PGraphics : MonoBehaviour {
 	private Stack<uint> keyStack = new Stack<uint>();
 	private Stack<bool> recycleStack = new Stack<bool>();
 	private Stack<bool> keepStack = new Stack<bool>();
+	private Stack<int> layerStack = new Stack<int>();
+	private Stack<int> layerMaskStack = new Stack<int>();
 	private Stack<PGameObject> drawParentObjStack = new Stack<PGameObject>();
 
 	private ScreenMode screenMode;
@@ -142,6 +156,7 @@ public class PGraphics : MonoBehaviour {
 	private bool isClearBG = false;
 	private bool isUseBaseCoordinate = false;
 	private bool isSetup = false;
+	private bool isLight = false;
 	private float fitScale = 1.0f;
 	private float invFitScale = 1.0f;
 	private Vector3 axis;
@@ -259,11 +274,19 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	protected virtual void UpdateOneInput() {
-		if(mouseButtonDown!=NONE) { onMousePressed(); }
+		if(mouseButtonDown!=NONE) {
+			endDragMouseX = beginDragMouseX = mouseX;
+			endDragMouseY = beginDragMouseY = mouseY;
+			onMousePressed();
+		}
 		if(mouseReleased) { onMouseReleased(); }
 		if(mouseX!=pmouseX || mouseY!=pmouseY) {
 			onMouseMoved();
-			if(mousePressed) { onMouseDragged(); }
+			if(mousePressed) {
+				endDragMouseX = mouseX;
+				endDragMouseY = mouseY;
+				onMouseDragged();
+			}
 		}
 		if(keyPressed) {
 			onKeyPressed();
@@ -342,6 +365,11 @@ public class PGraphics : MonoBehaviour {
 		if(!basicPrefabs.box) { basicPrefabs.box = Resources.Load("PPrefabs/Box") as GameObject; }
 		if(!basicPrefabs.sphere) { basicPrefabs.sphere = Resources.Load("PPrefabs/Sphere") as GameObject; }
 		if(!basicPrefabs.text) { basicPrefabs.text = Resources.Load("PPrefabs/Text") as GameObject; }
+		optionMaterials.fillLightOff = Resources.Load<Material>("PMaterials/fillMaterial_LightOff");
+		optionMaterials.fillZTestOff = Resources.Load<Material>("PMaterials/fillMaterial_ZTestOff"); 
+		optionMaterials.strokeZTestOff = Resources.Load<Material>("PMaterials/strokeMaterial_ZTestOff");
+		optionMaterials.fillZWriteOff = Resources.Load<Material>("PMaterials/fillMaterial_ZWriteOff"); 
+		optionMaterials.strokeZWriteOff = Resources.Load<Material>("PMaterials/strokeMaterial_ZWriteOff");
 	}
 
 	private PGameObject GetPrimitive() {
@@ -420,10 +448,15 @@ public class PGraphics : MonoBehaviour {
 			obj.transform.localPosition = newPos;
 
 			trans.localRotation = system.work.localRotation;
-			//trans.localScale = Vector3.Scale(system.work.localScale, sceneScale * scale);
 			trans.localScale = Vector3.Scale(system.work.localScale, toScene(scale));
 
-			if(obj.renderer) {
+			if(obj.prefabObj!=null) {
+				trans.localPosition += obj.prefabObj.transform.position;
+				trans.localRotation *= obj.prefabObj.transform.localRotation;
+				trans.localScale = Vector3.Scale(obj.prefabObj.transform.localScale, trans.localScale);
+			}
+
+			if(obj.GetComponent<Renderer>()) {
 				Color col;
 				if(obj.isImage) col = system.style.tintColor;
 				else if(obj.isLine) col = system.style.strokeColor;
@@ -433,13 +466,14 @@ public class PGraphics : MonoBehaviour {
 				else noFill(obj);
 
 				if(system.style.isStroke) {
-					obj._strokeColor = system.style.strokeColor;
+					obj.strokeColor = system.style.strokeColor;
 					stroke(obj, system.style.strokeColor);
 					strokeWeight(obj, system.style.strokeWeight);
 				} else noStroke(obj);
 			}
 
 			obj.gameObject.layer = system.style.layer;
+			obj.camera = system.camera;
 			if(obj.objFrameCount==0) { obj.setup(); }
 		}
 	}
@@ -448,16 +482,29 @@ public class PGraphics : MonoBehaviour {
 		if(obj.isText) {
 			TextMesh tm = obj.GetComponent<TextMesh>();
 			if(tm) { tm.color = col; }
-		} else if(obj.renderer) {
+		} else if(obj.GetComponent<Renderer>()) {
 			obj._color = col;
-			if(isEnableMaterialPB) {
+			if(isEnableMaterialPB && isZWrite) {
 				materialPB.Clear();
 				materialPB.AddColor("_Color", col);
-				obj.renderer.SetPropertyBlock(materialPB);
-			} else if(obj.renderer.material) {
-				obj.renderer.material.color = col;
+				obj.GetComponent<Renderer>().SetPropertyBlock(materialPB);
+			} else if(obj.GetComponent<Renderer>().material) {
+				if(!isLight) {
+					if(!obj.GetComponent<Renderer>().material.shader.name.Equals(optionMaterials.fillLightOff.shader.name)) {
+						obj.GetComponent<Renderer>().material.shader = optionMaterials.fillLightOff.shader;
+					}
+				} else if(!isZTest) {
+					if(!obj.GetComponent<Renderer>().material.shader.name.Equals(optionMaterials.fillZTestOff.shader.name)) {
+						obj.GetComponent<Renderer>().material.shader = optionMaterials.fillZTestOff.shader;
+					}
+				} else if(!isZWrite) {
+					if(!obj.GetComponent<Renderer>().material.shader.name.Equals(optionMaterials.fillZWriteOff.shader.name)) {
+						obj.GetComponent<Renderer>().material.shader = optionMaterials.fillZWriteOff.shader;
+					}
+				}
+				obj.GetComponent<Renderer>().material.color = col;
 			}
-			obj.renderer.enabled = true;
+			obj.GetComponent<Renderer>().enabled = true;
 		}
 	}
 
@@ -475,8 +522,8 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	public void noFill(PGameObject obj) {
-		if(!obj.isImage && obj.renderer) {
-			obj.renderer.enabled = false;
+		if(!obj.isImage && obj.GetComponent<Renderer>()) {
+			obj.GetComponent<Renderer>().enabled = false;
 		}
 	}
 
@@ -746,8 +793,8 @@ public class PGraphics : MonoBehaviour {
 	public int mouseX { get { return (int)pixelToScreenX(Input.mousePosition.x); } }
 	public int mouseY { get { return (int)pixelToScreenY(Input.mousePosition.y); } }
 	public int pmouseX { get; private set; } 
-	public int pmouseY { get; private set; } 
-	
+	public int pmouseY { get; private set; }
+
 	public bool keyPressed { get { return Input.anyKey; } }
 	public int key { get { return oneKey; } }
 	public int keyCode { get { return oneKeyCode; } }
@@ -877,7 +924,7 @@ public class PGraphics : MonoBehaviour {
 	public void loop() { isLoop = true; isNoLoop = false; }
 	public void noLoop() { isNoLoop = true; }
 
-	public void println(object message) { Debug.Log(message); }
+	public static void println(object message) { Debug.Log(message); }
 
 	#pragma warning disable 108
 	public Camera camera() {
@@ -889,7 +936,7 @@ public class PGraphics : MonoBehaviour {
 		AddCamera();
 		if(system.camera) {
 			system.camera.transform.localPosition = toScene(eyeX, eyeY, eyeZ);
-			system.camera.transform.LookAt(toScene(centerX, centerY, centerZ), toScene(upX, upY, upZ));
+			system.camera.transform.LookAt(toScene(centerX, centerY, centerZ), new Vector3(upX, upY, upZ));
 			system.camera.backgroundColor = system.style.backgroundColor;
 		}
 		return system.camera;
@@ -925,9 +972,9 @@ public class PGraphics : MonoBehaviour {
 		float fov = PI/3.0f;
 		float cameraZ = (height/2.0f) / tan(fov/2.0f);
 		if(screenMode==P2D || screenMode==P3D) {
-			return perspective(PI/3.0f, width/height, cameraZ/10.0f, cameraZ*10.0f);
+			return perspective(fov, width/height, cameraZ/10.0f, cameraZ*10.0f);
 		} else {
-			return perspective(PI/3.0f, width/height, 0.3f, 1000.0f);
+			return perspective(fov, width/height, 0.3f, 1000.0f);
 		}
 	}
 
@@ -1067,7 +1114,7 @@ public class PGraphics : MonoBehaviour {
 		rotateZ(angle);
 	}
 
-	public void rotateX(float angle, float x, float y, float z) {
+	public void rotate(float angle, float x, float y, float z) {
 		system.work.RotateAround(Vector3.zero, toScene(x, y, z), degrees(angle));
 	}
 
@@ -1300,7 +1347,7 @@ public class PGraphics : MonoBehaviour {
 			tm.fontSize = (int)(system.style.textSize * fitScale);
 			if(system.style.font!=null) {
 				tm.font = system.style.font;
-				obj.renderer.material = system.style.font.material;
+				obj.GetComponent<Renderer>().material = system.style.font.material;
 			}
 			tm.text = str;
 			tm.anchor = TextAnchor.MiddleCenter;
@@ -1341,10 +1388,10 @@ public class PGraphics : MonoBehaviour {
 	
 	public PImage loadImage(GameObject obj, string path, int width = 0, int height = 0) {
 		PImage img = obj.AddComponent<PImage>();
-		img.graphics = this;
+		//img.graphics = this;
 		img.width = width;
 		img.height = height;
-		img.load(path);
+		img.load(this, path);
 		img.gameObject.SetActive(false);
 		return img;
 	}
@@ -1372,7 +1419,7 @@ public class PGraphics : MonoBehaviour {
 		if(!objImg) {
 			obj.name = "Image(Clone)";
 			objImg = obj.gameObject.AddComponent<PImage>();
-			objImg.graphics = this;
+			//objImg.graphics = this;
 			if(obj.wireframe) Destroy(obj.gameObject.GetComponent<PWireframe>());
 		}
 		objImg.set(img);
@@ -1382,8 +1429,9 @@ public class PGraphics : MonoBehaviour {
 	}
 
 	public void noLights() {
-		RenderSettings.ambientLight = Color.white;
-		Light[] lights = GetComponentsInChildren<Light>();
+		isLight = false;
+        if(isEnableAutoAmbient) RenderSettings.ambientLight = Color.white;
+        Light[] lights = GetComponentsInChildren<Light>();
 		foreach(Light light in lights) {
 			if(light.gameObject.layer==system.style.layer) {
 				light.enabled = false;
@@ -1393,15 +1441,17 @@ public class PGraphics : MonoBehaviour {
 
 	public void lights() {
 		noLights();
-		ambientLight(128, 128, 128);
+        if(isEnableAutoAmbient) ambientLight(128, 128, 128);
 		directionalLight(128, 128, 128, 0, 0, -1);
 	}
 
 	public void ambientLight(int r, int g, int b) {
+		isLight = true;
 		RenderSettings.ambientLight = color(r, g, b);
-	}
+    }
 
 	public PGameObject directionalLight(int r, int g, int b, float nx, float ny, float nz) {
+		isLight = true;
 		var obj = pobject("DirectionalLight");
 		Light light = obj.GetComponent<Light>();
 		if(!light) { light = obj.gameObject.AddComponent<Light>(); }
@@ -1467,12 +1517,34 @@ public class PGraphics : MonoBehaviour {
 		if(jsonObject==null) return false;
 		return jsonObject.save (this, filename);
 	}
+
+	public enum HintType {
+		DISABLE_DEPTH_TEST,
+		ENABLE_DEPTH_TEST,
+		DISABLE_DEPTH_WRITE,
+		ENABLE_DEPTH_WRITE
+	}
+	public const HintType DISABLE_DEPTH_TEST = HintType.DISABLE_DEPTH_TEST;
+	public const HintType ENABLE_DEPTH_TEST = HintType.ENABLE_DEPTH_TEST;
+	public const HintType DISABLE_DEPTH_WRITE = HintType.DISABLE_DEPTH_WRITE;
+	public const HintType ENABLE_DEPTH_WRITE = HintType.ENABLE_DEPTH_WRITE;
+	protected bool isZTest = true;
+	protected bool isZWrite = true;
+
+	public void hint(HintType hintType) {
+		switch(hintType) {
+		case HintType.DISABLE_DEPTH_TEST: isZTest = false; break;
+		case HintType.ENABLE_DEPTH_TEST: isZTest = true; break;
+		case HintType.DISABLE_DEPTH_WRITE: isZWrite = false; break;
+		case HintType.ENABLE_DEPTH_WRITE: isZWrite = true; break;
+		}
+	}
 	#endregion
 	
 	#region Processing Extra Members
-	public void debuglog(object message) { Debug.Log(message); }
-	public void debuglogWaring(object message) { Debug.LogWarning(message); }
-	public void debuglogError(object message) { Debug.LogError(message); }
+	public static void debuglog(object message) { Debug.Log(message); }
+	public static void debuglogWaring(object message) { Debug.LogWarning(message); }
+	public static void debuglogError(object message) { Debug.LogError(message); }
 
 	public bool is2D { get { return (screenMode==P2D || screenMode==U2D); } }
 	public bool is3D { get { return !is2D; } }
@@ -1587,6 +1659,15 @@ public class PGraphics : MonoBehaviour {
 
 	internal PStyle getStyle() { return system.style; }
 
+	public int moveMouseX { get { return mouseX - pmouseX; } } 
+	public int moveMouseY { get { return mouseY - pmouseY; } } 
+	public int dragMouseX { get { return endDragMouseX - beginDragMouseX; } } 
+	public int dragMouseY { get { return endDragMouseY - beginDragMouseY; } } 
+	public int beginDragMouseX { get; private set; } 
+	public int beginDragMouseY { get; private set; } 
+	public int endDragMouseX { get; private set; } 
+	public int endDragMouseY { get; private set; } 
+
 	public bool mouseReleased { get { return mouseButtonUp != NONE; } }
 	public int mouseButtonUp {
 		get {
@@ -1618,15 +1699,14 @@ public class PGraphics : MonoBehaviour {
 	public float inputX { get { return Input.GetAxis("Horizontal"); } }
 	public float inputY { get { return Input.GetAxis("Vertical"); } }
 
-	#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBPLAYER
-	public int touchCount { get { return mousePressed ? 1 : 0; } }
 	public bool touchPressed { get { return mousePressed; } }
 	public bool touchReleased { get { return mouseReleased; } }
+	public bool touchDown { get { return mouseButtonDown!=NONE; } }
+	#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBPLAYER
+	public int touchCount { get { return mousePressed ? 1 : 0; } }
 	public Vector2 touch(int index) { return new Vector2(mouseX, mouseY); }
 	#else
 	public int touchCount { get { return Input.touchCount; } }
-	public bool touchPressed { get { return mousePressed; } }
-	public bool touchReleased { get { return mouseReleased; } }
 	public Vector2 touch(int index) {
 		Touch t = Input.GetTouch(index);
 		return new Vector2(pixelToScreenX(t.position.x), pixelToScreenY(t.position.y));
@@ -1645,6 +1725,16 @@ public class PGraphics : MonoBehaviour {
 	public void layerAndMask(string layerName) { layer(layerName); layerMask(layerName); }
 	public void layer(int layerIndex) { system.style.layer = layerIndex; }
 	public void layer(string layerName) { system.style.layer = LayerMask.NameToLayer(layerName); }
+	public void beginLayer(string layerName) { beginLayer(LayerMask.NameToLayer(layerName)); }
+	public void beginLayer(int layerIndex) {
+		layerStack.Push(system.style.layer);
+		layerMaskStack.Push(system.style.layerMask);
+		layer(layerIndex);
+	}
+	public void endLayer() {
+		layerMask(layerMaskStack.Pop());
+		layer(layerStack.Pop());
+	}
 	public void layerMask(int layerBits) { system.style.layerMask = layerBits; }
 	public void layerMask(string layerName) { system.style.layerMask = 1 << LayerMask.NameToLayer(layerName); }
 	public void layerMaskEverything() { system.style.layerMask = -1; }
@@ -1664,7 +1754,7 @@ public class PGraphics : MonoBehaviour {
 		List<uint> removeKeys = new List<uint>();
 		foreach(KeyValuePair<uint, GameObject> pair in recyclePrimitives) {
 			if(!pair.Value) continue;
-			if(id > 0) {
+			if(workPrimitiveGroupIndex > 0) {
 				PGameObject pobj = pair.Value.GetComponent<PGameObject>();
 				if(pobj!=null) {
 					if( pobj.primitiveKey / PrimitiveGroupMult != id ) {
@@ -1675,12 +1765,12 @@ public class PGraphics : MonoBehaviour {
 			}
 			Destroy(pair.Value);
 		}
-		if (id > 0) {
+		if(workPrimitiveGroupIndex > 0) {
 			foreach(uint key in removeKeys) {
 				recyclePrimitives.Remove(key);
 			}
 		} else {
-			recyclePrimitives.Clear ();
+			recyclePrimitives.Clear();
 		}
 	}
 
@@ -1695,16 +1785,19 @@ public class PGraphics : MonoBehaviour {
 
 	public void recycle() { system.style.isRecycle = true; }
 	public void noRecycle() { system.style.isRecycle = false; }
-	public void beginRecycle(short id) {
-		if(id==0) {
+	public short beginRecycle(short id) {
+		if(id < 0) {
 			++workPrimitiveGroupIndex;
 			if(workPrimitiveGroupIndex>=short.MaxValue) { Debug.LogError("over recycle groups", this); }
 			id = (short)workPrimitiveGroupIndex; 
+		} else if(id > workPrimitiveGroupIndex) {
+			workPrimitiveGroupIndex = (uint)id;
 		}
 		recycleStack.Push(system.style.isRecycle);
 		keyStack.Push(workPrimitiveKey);
 		workPrimitiveKey = (uint)id * PrimitiveGroupMult;
 		recycle();
+		return id;
 	}
 	public void beginNoRecycle() {
 		recycleStack.Push(system.style.isRecycle);
@@ -1727,6 +1820,15 @@ public class PGraphics : MonoBehaviour {
 		noKeep();
 	}
 
+	public GameObject loadPrefab(string path) {
+		GameObject prefabObj = Resources.Load(path) as GameObject;
+		if(!prefabObj) {
+			debuglogWaring("loadPrefab <NotFound> " + path);
+			return null;
+		}
+		return prefabObj;
+	}
+	
 	public T prefab<T>(GameObject prefabObj, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) where T : MonoBehaviour {
 		if(!prefabObj) {
 			debuglogWaring("prefab <Null Resource>");
@@ -1743,6 +1845,7 @@ public class PGraphics : MonoBehaviour {
 			comp = gameObj.GetComponent<T>();
 			if(!comp) { comp = gameObj.AddComponent<T>(); }
 			obj = AddPrimitive(gameObj);
+			obj.prefabObj = prefabObj;
 		} else {
 			comp = obj.GetComponent<T>();
 		}
@@ -1757,9 +1860,8 @@ public class PGraphics : MonoBehaviour {
 	public T prefab<T>(string path, float x=0.0f, float y=0.0f, float z=0.0f, float sx=1.0f, float sy=1.0f, float sz=1.0f) where T : MonoBehaviour {
 		PGameObject obj = GetPrimitive();
 		if(!obj) {
-			GameObject prefabObj = Resources.Load(path) as GameObject;
+			GameObject prefabObj = loadPrefab(path);
 			if(!prefabObj) {
-				debuglogWaring("prefab <NotFound> " + path);
 				return null;
 			}
 			return prefab<T>(prefabObj, x, y, z, sx, sy, sz);

@@ -34,13 +34,13 @@ public class Earth : uProcessing {
 			sphere(20);
 
 		popMatrix();
-	}
+    }
 
 	protected override void onMousePressed() {
 		isStroke = !isStroke;
 	}
 
 	protected override void onKeyTyped() {
-		if(key == ESC) { loadScene("Menu"); }
+		if(key == ESC || key == 'q') { loadScene("Menu"); }
 	}
 }

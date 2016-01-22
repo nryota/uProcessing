@@ -9,9 +9,9 @@ About
 UnityでProcessingっぽく書けるライブラリ（アセット）一式です。
 現在移植してある関数は一部で、最適化などはされていません。
 LowLevelAPIで描くのではなく、Hierarchyに普通にGameObjectを生成して使う構成なのが特徴です。  
-Unity 4を対象としています。
+~~Unity 4~~Unity 5を対象としています。
 
-使い方は簡単、PGraphics（MonoBehaviour）を継承したスクリプトをオブジェクトに貼り付け、setup()とdraw()関数をオーバーライドし、Processingに似た形でコードを書くだけです。Unityのコードもそのまま共存して使えます。言語はC#です。
+使い方は簡単、PGraphics（MonoBehaviour）またはuProcessingを継承したスクリプトをオブジェクトに貼り付け、setup()とdraw()関数をオーバーライドし、Processingに似た形でコードを書くだけです。Unityのコードもそのまま共存して使えます。言語はC#です。
 
 ![基本画面](http://dev.eyln.com/GitHub/uProcessing/screenshot.png "ScreenShot")
 
@@ -48,6 +48,11 @@ Unity 4を対象としています。
 
 Updates
 --------
+
+#### 2016.1.22
+
+ひとまずUnity5向けにプロジェクトをコンバートし、動作が変わっていたところを修正しました。
+
 
 #### 2015.4.17
 

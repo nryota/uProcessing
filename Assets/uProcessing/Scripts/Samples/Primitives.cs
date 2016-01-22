@@ -22,6 +22,6 @@ public class Primitives : uProcessing {
 	}
 
 	protected override void onKeyTyped() {
-		if(key == ESC) { loadScene("Menu"); }
-	}
+        if(key == ESC || key == 'q') { loadScene("Menu"); }
+    }
 }

@@ -62,11 +62,11 @@ public class Tweens : uProcessing {
 	}
 	
 	protected override void onKeyTyped() {
-		if(key == ESC) { loadScene("ListView"); }
-	}
+        if(key == ESC || key == 'q') { loadScene("ListView"); }
+    }
 
-	#region EaseFunc
-	PTweenEaseFunc[] easeFuncs = {
+    #region EaseFunc
+    PTweenEaseFunc[] easeFuncs = {
 		PEase.Step, PEase.Linear,
 		PEase.InQuad, PEase.OutQuad, PEase.InOutQuad,
 		PEase.InCubic, PEase.OutCubic, PEase.InOutCubic,

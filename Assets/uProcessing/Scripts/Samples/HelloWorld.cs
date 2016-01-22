@@ -11,7 +11,7 @@ public class HelloWorld : uProcessing {
 		textSize(24);
 		text("と、UnityでProcessingっぽく書ける", 50, height/2 + 30);
 		textSize(18);
-		text("ESCキーでMenuへ", 50, height - 30);
+		text("ESCキー、qキーでMenuへ", 50, height - 30);
 		noLoop();
 	}
 
@@ -19,6 +19,6 @@ public class HelloWorld : uProcessing {
 	}
 
 	protected override void onKeyTyped() {
-		if(key == ESC) { loadScene("Menu"); }
-	}
+        if(key == ESC || key == 'q') { loadScene("Menu"); }
+    }
 }

@@ -713,7 +713,8 @@ public class PTweener {
 	}
 	
 	public static void update(float elapsedTime = 1.0f / 60.0f) {
-		foreach(PTween t in tweens) {
+		PTween[] tweenArray = tweens.ToArray();
+		foreach(PTween t in tweenArray) {
 			if(t.PrevTween==null) {
 				t.update(elapsedTime);
 			}

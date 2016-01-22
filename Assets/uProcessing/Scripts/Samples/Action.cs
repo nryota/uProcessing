@@ -75,8 +75,8 @@ public class Action : uProcessing {
 	}
 	
 	protected override void onKeyTyped() {
-		if(key == ESC) { loadScene("Menu"); }
-	}
+        if(key == ESC || key == 'q') { loadScene("Menu"); }
+    }
 }
 
 [System.SerializableAttribute]
@@ -99,7 +99,7 @@ class UnityChan {
 		//obj.addRigid();
 
 		obj.transform.Rotate(0, 90, 0);
-		obj.rigidbody.constraints |= RigidbodyConstraints.FreezePositionZ;
+		obj.GetComponent<Rigidbody>().constraints |= RigidbodyConstraints.FreezePositionZ;
 		g.endKeep();
 	}
 
@@ -122,7 +122,7 @@ class UnityChan {
 			obj.anim.SetBool("Slide", false);
 			if(g.isButtonDown("Jump") || g.isKeyDown(KeyCode.UpArrow)) {
 				if(!obj.animator.IsInTransition(0) && v >= 0.0f) {
-					obj.rigidbody.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
+					obj.GetComponent<Rigidbody>().AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
 					obj.anim.SetBool("Jump", true);
 				}
 			} else if(g.isButtonDown("Fire1") || g.isKeyDown(KeyCode.DownArrow)) {

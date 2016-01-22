@@ -8,6 +8,9 @@ public class PGameObject : MonoBehaviour {
 	internal PGraphics graphics;
 	public PGraphics g { get { return graphics; } }
 
+	internal GameObject prefabObj = null;
+	internal Camera camera = null;
+
 	internal Color _color;
 	internal Color _strokeColor;
 
@@ -78,8 +81,14 @@ public class PGameObject : MonoBehaviour {
 	}
 
 	public void translate(float x, float y, float z=0.0f) { gameObject.transform.Translate(graphics.toScene(x, y, z)); }
-	public void scale(float s) { gameObject.transform.localScale = new Vector3(s, s, s); }
-	public void scale(float x, float y, float z=1.0f) { gameObject.transform.localScale = new Vector3(x, y, z); }
+	public void scale(float s) { scale(s, s, s); }
+	//public void scale(float x, float y, float z=1.0f) { gameObject.transform.localScale = new Vector3(x, y, z); }
+	public void scale(float x, float y, float z=1.0f) { var s = gameObject.transform.localScale; gameObject.transform.localScale = new Vector3(s.x * x, s.y * y, s.z * z); }
+	public void rotate(float angle) { rotateZ(angle); }
+	public void rotate(float angle, float x, float y, float z) { transform.RotateAround(Vector3.zero, g.toScene(x, y, z), g.degrees(angle)); }
+	public void rotateX(float angle) { transform.Rotate(g.degrees(angle) * g.axis3D.x, 0.0f, 0.0f); }
+	public void rotateY(float angle) { transform.Rotate(0.0f, g.degrees(angle) * g.axis3D.y, 0.0f); }
+	public void rotateZ(float angle) { transform.Rotate(0.0f, 0.0f, g.degrees(angle) * g.axis3D.z); }
 	public void tint(int gray, int alpha = 255) { tint(PGraphics.color(gray, alpha)); }
 	public void tint(int r, int g, int b, int a = 255) { tint(PGraphics.color(r, g, b, a)); }
 	public void tint(Color col) { graphics.tint(this, col); }
@@ -159,9 +168,19 @@ public class PGameObject : MonoBehaviour {
 	public bool isText { get { return GetComponent<TextMesh>()!=null; } }
 	public bool is2D { get { return primitiveType==PrimitiveType.Rect || primitiveType==PrimitiveType.Ellipse || primitiveType==PrimitiveType.Line || primitiveType==PrimitiveType.Text || primitiveType==PrimitiveType.Shape2D; } } 
 	
-	public RaycastHit raycastScreen() { return graphics.raycastScreen(); }
+	public RaycastHit raycastScreen(float distance=PGraphics.INFINITY, int layerMask=-1) {
+		return raycastScreen(g.mouseX, g.mouseY, distance, layerMask);
+	}
+	
+	public RaycastHit raycastScreen(float x, float y, float distance=PGraphics.INFINITY, int layerMask=-1) {
+		Ray ray = camera.ScreenPointToRay(new Vector3(g.screenToPixelX(x), g.screenToPixelY(y), Input.mousePosition.z));
+		RaycastHit hitInfo;
+		Physics.Raycast(ray, out hitInfo, distance, layerMask);
+		return hitInfo;
+	}
+
 	public bool isHitMouse { get {
-			RaycastHit hit = graphics.raycastScreen();
+			RaycastHit hit = raycastScreen();
 			return (hit.collider!=null && hit.collider.gameObject==this.gameObject);
 		}
 	}
