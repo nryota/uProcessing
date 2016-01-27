@@ -292,7 +292,7 @@ public class PTween<T> : PTween where T : struct {
 	*/
 	
 	private PTween _from<S>(object obj, string name, S start, float delay=0.0f) where S : struct {
-		PTween<S> s = this;
+		PTween<S> s = this as PTween<S>;
 		if (typeof(T) != typeof(S) || target != null) {
 			s = PTweener.createTween<S>() as PTween<S>;
 			NextTween = s;
@@ -301,7 +301,7 @@ public class PTween<T> : PTween where T : struct {
 		if(obj != null && name != null) {
 			s.setTarget(obj, name);
 		} else {
-			s.setTarget(this);
+			s.setTarget(this as PTween<S>);
 		}
 		s.timer.currentTime = -delay;
 		s.start = start;
@@ -322,7 +322,7 @@ public class PTween<T> : PTween where T : struct {
 	}
 
 	private PTween _to<S>(S end, float duration, PTweenEaseFunc easeFunc, PTweenOnComplete onComplete=null) where S : struct {
-		PTween<S> s = this;
+		PTween<S> s = this as PTween<S>;
 		if(target != null) {
 			s = s._from(s.end) as PTween<S>;
 		}

@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using uP5;
 
 public class Tweens : uProcessing {
 
 	Color col = Color.gray;
-	Vector3 pos;
+    Color bgCol = Color.black;
+    Vector3 pos;
 	PTween fadeTween, posTween;
 	EaseType easeType = EaseType.OutQuart;
 
@@ -13,21 +15,23 @@ public class Tweens : uProcessing {
 
 		fadeTween = tween(255, 0, 1.0f, PEase.InCubic);
 
-		tween(this, "col", Color.gray, Color.green, 0.5f, PEase.OutQuad)
+        tween(this, "col", Color.gray, Color.green, 0.5f, PEase.OutQuad)
 			.to(Color.yellow, 0.5f, PEase.OutQuad)
 			.wait(1.0f)
 			.to(Color.red, 1.0f, PEase.Linear)
 			.reverse()
 			.loop();
 
-		pos = new Vector3(width / 2, height /2, 0.0f);
+        wait(3.0f).call(changeBGColor).loop();
+
+        pos = new Vector3(width / 2, height /2, 0.0f);
 
 		recycle();
 		noStroke();
 	}
 
 	protected override void draw() {
-		background(0);
+		background(bgCol);
 
 		fill(col);
 		ellipse(pos.x, pos.y, 40, 40);
@@ -63,6 +67,10 @@ public class Tweens : uProcessing {
 	
 	protected override void onKeyTyped() {
         if(key == ESC || key == 'q') { loadScene("ListView"); }
+    }
+
+    void changeBGColor(PTween tween) {
+        bgCol = color(random(100), random(100), random(100));
     }
 
     #region EaseFunc

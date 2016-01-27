@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using uP5;
 
 public class Performance : uProcessing {
 	protected override void setup() {
@@ -10,7 +11,6 @@ public class Performance : uProcessing {
 	protected override void draw() {
 		background(0);
 
-		//perspective();
 		strokeWeight(5);
 		stroke(255, 255, 0);
 		line(mouseX, 0, mouseX, height);
