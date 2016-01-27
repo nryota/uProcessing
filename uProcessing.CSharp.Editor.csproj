@@ -102,30 +102,6 @@
     <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
       <HintPath>Library\UnityAssemblies\SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEditor.EditorTestsRunner">
-      <HintPath>Library\UnityAssemblies\UnityEditor.EditorTestsRunner.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.Networking">
-      <HintPath>Library\UnityAssemblies\UnityEditor.Networking.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework">
-      <HintPath>Library\UnityAssemblies\nunit.framework.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.UI">
-      <HintPath>Library\UnityAssemblies\UnityEditor.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.Advertisements">
-      <HintPath>Library\UnityAssemblies\UnityEditor.Advertisements.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.TreeEditor">
-      <HintPath>Library\UnityAssemblies\UnityEditor.TreeEditor.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>Library\UnityAssemblies\UnityEngine.UI.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
       <HintPath>Library\UnityAssemblies\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
     </Reference>
@@ -155,6 +131,7 @@
     <None Include="Assets\uProcessing\Materials\fillShader.shader" />
     <None Include="Assets\uProcessing\Materials\strokeShader.shader" />
     <None Include="Assets\uProcessing\OtherAssets\Standard Assets\Skyboxes\_skybox info.txt" />
+    <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_akarami_blend.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eye.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eye_blend.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eyelash_blend.shader" />
@@ -164,6 +141,8 @@
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada_blend.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hair.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hair_ds.shader" />
+    <None Include="Assets\uProcessing\OtherAssets\UnityChan\Stage\Shader\AlphaMask.shader" />
+    <None Include="Assets\uProcessing\OtherAssets\UnityChan\license.txt" />
     <None Include="Assets\uProcessing\Resources\PMaterials\fillShader.shader" />
     <None Include="Assets\uProcessing\Resources\PMaterials\fillShader_LightOff.shader" />
     <None Include="Assets\uProcessing\Resources\PMaterials\fillShader_ZTestOff.shader" />

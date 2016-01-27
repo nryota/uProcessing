@@ -76,7 +76,9 @@
   <ItemGroup>
     <Compile Include="Assets\uProcessing\Libraries\PMiniJSON.cs" />
     <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\FaceAnimation\FaceUpdate.cs" />
+    <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\Scripts\CameraController.cs" />
     <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\Scripts\IdleChanger.cs" />
+    <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\Scripts\SceneLoader.cs" />
     <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\Scripts\ThirdPersonCamera.cs" />
     <Compile Include="Assets\uProcessing\OtherAssets\UnityChan\Scripts\UnityChanControlScriptWithRgidBody.cs" />
     <Compile Include="Assets\uProcessing\Scripts\Core\PGameObject.cs" />
@@ -108,6 +110,7 @@
     <None Include="Assets\uProcessing\Materials\fillShader.shader" />
     <None Include="Assets\uProcessing\Materials\strokeShader.shader" />
     <None Include="Assets\uProcessing\OtherAssets\Standard Assets\Skyboxes\_skybox info.txt" />
+    <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_akarami_blend.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eye.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eye_blend.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_eyelash_blend.shader" />
@@ -117,6 +120,8 @@
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hada_blend.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hair.shader" />
     <None Include="Assets\uProcessing\OtherAssets\UnityChan\Models\UnityChanShader\Shader\Unitychan_chara_hair_ds.shader" />
+    <None Include="Assets\uProcessing\OtherAssets\UnityChan\Stage\Shader\AlphaMask.shader" />
+    <None Include="Assets\uProcessing\OtherAssets\UnityChan\license.txt" />
     <None Include="Assets\uProcessing\Resources\PMaterials\fillShader.shader" />
     <None Include="Assets\uProcessing\Resources\PMaterials\fillShader_LightOff.shader" />
     <None Include="Assets\uProcessing\Resources\PMaterials\fillShader_ZTestOff.shader" />

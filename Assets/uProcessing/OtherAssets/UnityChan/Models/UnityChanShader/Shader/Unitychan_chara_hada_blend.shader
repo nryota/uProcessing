@@ -15,7 +15,7 @@ Shader "UnityChan/Skin - Transparent"
 		Blend SrcAlpha OneMinusSrcAlpha, One One 
 		Tags
 		{
-			"Queue"="Geometry+1" // Transparent+1"
+			"Queue"="Transparent+1"
 			"IgnoreProjector"="True"
 			"RenderType"="Overlay"
 			"LightMode"="ForwardBase"

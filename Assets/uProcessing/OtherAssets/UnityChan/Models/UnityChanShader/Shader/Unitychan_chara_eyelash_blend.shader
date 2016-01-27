@@ -15,7 +15,7 @@ Shader "UnityChan/Eyelash - Transparent"
 		Blend SrcAlpha OneMinusSrcAlpha, One One 
 		Tags
 		{
-			"Queue"="Transparent+2"
+			"Queue"="Geometry+2"
 			// "IgnoreProjector"="True"
 			"RenderType"="Overlay"
 			"LightMode"="ForwardBase"

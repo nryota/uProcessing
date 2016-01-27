@@ -177,6 +177,8 @@ namespace uP5
         public int animHash(string name) { return Animator.StringToHash(name); }
         public bool isAnimState(string name) { return animHash(name) == animState.fullPathHash; }
 
+        public Rigidbody rigidBody { get { return GetComponent<Rigidbody>(); } }
+        public Rigidbody2D rigidBody2D { get { return GetComponent<Rigidbody2D>(); } }
         public Rigidbody addRigid() { return gameObject.AddComponent<Rigidbody>(); }
         public Rigidbody2D addRigid2D() { return gameObject.AddComponent<Rigidbody2D>(); }
 

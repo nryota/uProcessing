@@ -53,9 +53,9 @@ public class Action : uProcessing {
 			translate(bx * 3, y, 0); 
 			fill((int)(level * 255), 0, 0);
 			/*var obj = */box(random(0.2f, 2.5f), 0.2f, 2.0f);
-			/*if(!obj.rigidbody) {
+			/*if(!obj.rigidBody) {
 				obj.addRigid();
-				obj.rigidbody.isKinematic = true;
+				obj.rigidBody.isKinematic = true;
 			}*/
 			popMatrix();
 		}
@@ -99,7 +99,7 @@ class UnityChan {
 		//obj.addRigid();
 
 		obj.transform.Rotate(0, 90, 0);
-		obj.GetComponent<Rigidbody>().constraints |= RigidbodyConstraints.FreezePositionZ;
+		obj.rigidBody.constraints |= RigidbodyConstraints.FreezePositionZ;
 		g.endKeep();
 	}
 
@@ -122,7 +122,7 @@ class UnityChan {
 			obj.anim.SetBool("Slide", false);
 			if(g.isButtonDown("Jump") || g.isKeyDown(KeyCode.UpArrow)) {
 				if(!obj.animator.IsInTransition(0) && v >= 0.0f) {
-					obj.GetComponent<Rigidbody>().AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
+					obj.rigidBody.AddForce(Vector3.up * jumpPower, ForceMode.VelocityChange);
 					obj.anim.SetBool("Jump", true);
 				}
 			} else if(g.isButtonDown("Fire1") || g.isKeyDown(KeyCode.DownArrow)) {
